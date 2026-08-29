@@ -206,6 +206,10 @@ main{
     font-weight:bold;
 }
 
+.play-button:hover{
+    transform:translateY(-2px);
+}
+
 /* PLAYERS */
 
 .players-section{
@@ -265,6 +269,10 @@ main{
     color:#251b0e;
     font-weight:bold;
     cursor:pointer;
+}
+
+.challenge-button:hover{
+    transform:translateY(-1px);
 }
 
 .empty{
@@ -362,6 +370,31 @@ main{
     }
 }
 
+/* CONNECTION STATUS */
+
+.connection-status{
+    position:fixed;
+    left:50%;
+    bottom:20px;
+    transform:translateX(-50%);
+    padding:9px 16px;
+    border-radius:20px;
+    background:rgba(0,0,0,.55);
+    border:1px solid rgba(255,255,255,.12);
+    font-size:12px;
+    font-family:monospace;
+    z-index:5000;
+    transition:.3s;
+}
+
+.connection-status.online{
+    color:#72f5a5;
+}
+
+.connection-status.offline{
+    color:#ff8f8f;
+}
+
 /* MOBILE */
 
 @media(max-width:600px){
@@ -395,11 +428,9 @@ main{
 </style>
 </head>
 
-
 <body>
 
 <div class="background">
-
     <div class="sun"></div>
 
     <div class="mountain one"></div>
@@ -408,9 +439,7 @@ main{
     <div class="mountain four"></div>
 
     <div class="ground"></div>
-
 </div>
-
 
 <header>
 
@@ -419,16 +448,13 @@ main{
     </div>
 
     <div class="id-box">
-
         ID:
         <span id="myId">
             Connecting...
         </span>
-
     </div>
 
 </header>
-
 
 <main>
 
@@ -439,7 +465,6 @@ main{
     <p class="subtitle">
         Choose a game and challenge another player
     </p>
-
 
     <div class="games">
 
@@ -468,7 +493,6 @@ main{
 
     </div>
 
-
     <section class="players-section">
 
         <div class="section-title">
@@ -479,17 +503,14 @@ main{
             class="players"
             id="players"
         >
-
             <div class="empty">
                 Connecting to DuoPlay...
             </div>
-
         </div>
 
     </section>
 
 </main>
-
 
 <!-- REQUEST -->
 
@@ -538,7 +559,6 @@ main{
 
 </div>
 
-
 <!-- WAITING -->
 
 <div
@@ -562,39 +582,91 @@ main{
 
 </div>
 
+<div
+    class="connection-status offline"
+    id="connectionStatus"
+>
+    Connecting...
+</div>
 
 <script>
 
 /* =====================================================
-   SERVER CONNECTION
-===================================================== */
+   DUOPLAY SERVER
+   ===================================================== */
+
+/*
+ * LOCAL:
+ * http://localhost:3000
+ *
+ * RENDER:
+ * https://duoplayserver.onrender.com
+ */
 
 const SERVER =
-    window.location.protocol +
-    "//" +
-    window.location.hostname +
-    ":3000";
+    (
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1"
+    )
+        ? "http://localhost:3000"
+        : "https://duoplayserver.onrender.com";
 
 
-console.log(
-    "DuoPlay server:",
-    SERVER
-);
+console.log("================================");
+console.log("DuoPlay");
+console.log("Server:", SERVER);
+console.log("================================");
 
 
 /* =====================================================
-   SAVED PLAYER ID
-===================================================== */
+   ELEMENTS
+   ===================================================== */
+
+const myIdElement =
+    document.getElementById("myId");
+
+const playersElement =
+    document.getElementById("players");
+
+const requestOverlay =
+    document.getElementById("requestOverlay");
+
+const requestPlayer =
+    document.getElementById("requestPlayer");
+
+const waitingOverlay =
+    document.getElementById("waitingOverlay");
+
+const waitingText =
+    document.getElementById("waitingText");
+
+const acceptButton =
+    document.getElementById("acceptButton");
+
+const declineButton =
+    document.getElementById("declineButton");
+
+const connectionStatus =
+    document.getElementById("connectionStatus");
+
+
+/* =====================================================
+   VARIABLES
+   ===================================================== */
+
+let myId = null;
+
+let currentRequest = null;
+
+let gameStarting = false;
 
 let savedPlayerId =
-    localStorage.getItem(
-        "duoplayPlayerId"
-    );
+    localStorage.getItem("duoplayPlayerId");
 
 
 /* =====================================================
-   SOCKET
-===================================================== */
+   SOCKET CONNECTION
+   ===================================================== */
 
 const socket =
     io(
@@ -603,103 +675,53 @@ const socket =
             transports:[
                 "websocket",
                 "polling"
-            ]
+            ],
+
+            reconnection:true,
+
+            reconnectionAttempts:Infinity,
+
+            reconnectionDelay:1000,
+
+            reconnectionDelayMax:5000
         }
     );
 
 
 /* =====================================================
-   ELEMENTS
-===================================================== */
-
-const myIdElement =
-    document.getElementById(
-        "myId"
-    );
-
-const playersElement =
-    document.getElementById(
-        "players"
-    );
-
-const requestOverlay =
-    document.getElementById(
-        "requestOverlay"
-    );
-
-const requestPlayer =
-    document.getElementById(
-        "requestPlayer"
-    );
-
-const waitingOverlay =
-    document.getElementById(
-        "waitingOverlay"
-    );
-
-const waitingText =
-    document.getElementById(
-        "waitingText"
-    );
-
-const acceptButton =
-    document.getElementById(
-        "acceptButton"
-    );
-
-const declineButton =
-    document.getElementById(
-        "declineButton"
-    );
-
-
-let myId = null;
-
-let currentRequest = null;
-
-let gameStarting = false;
-
-
-/* =====================================================
    CONNECT
-===================================================== */
+   ===================================================== */
 
 socket.on(
     "connect",
     () => {
 
         console.log(
-            "Connected:",
+            "Connected to DuoPlay:",
             socket.id
         );
 
+        connectionStatus.textContent =
+            "● Connected";
+
+        connectionStatus.className =
+            "connection-status online";
+
 
         /*
-         * Tell the server who this player is.
-         *
-         * If an ID already exists, the server restores it.
+         * Restore previous player ID
          */
 
-        if(
-            savedPlayerId
-        ){
+        if(savedPlayerId){
 
             console.log(
                 "Restoring player:",
                 savedPlayerId
             );
 
-
             socket.emit(
                 "registerPlayer",
                 savedPlayerId
-            );
-
-        }
-        else{
-
-            console.log(
-                "Creating new player"
             );
 
         }
@@ -710,35 +732,23 @@ socket.on(
 
 /* =====================================================
    YOUR ID
-===================================================== */
+   ===================================================== */
 
 socket.on(
     "yourId",
     id => {
 
-        myId =
-            id;
+        myId = id;
 
-
-        savedPlayerId =
-            id;
-
-
-        /*
-         * VERY IMPORTANT:
-         *
-         * Save ID so chess.html can reuse it.
-         */
+        savedPlayerId = id;
 
         localStorage.setItem(
             "duoplayPlayerId",
             id
         );
 
-
         myIdElement.textContent =
             id;
-
 
         console.log(
             "DuoPlay ID:",
@@ -751,15 +761,18 @@ socket.on(
 
 /* =====================================================
    ONLINE PLAYERS
-===================================================== */
+   ===================================================== */
 
 socket.on(
     "players",
     players => {
 
-        showPlayers(
+        console.log(
+            "Players:",
             players
         );
+
+        showPlayers(players);
 
     }
 );
@@ -767,53 +780,43 @@ socket.on(
 
 /* =====================================================
    SHOW PLAYERS
-===================================================== */
+   ===================================================== */
 
-function showPlayers(
-    players
-){
+function showPlayers(players){
 
-    playersElement.innerHTML =
-        "";
+    playersElement.innerHTML = "";
 
 
-    if(
-        !Array.isArray(players)
-    ){
+    if(!Array.isArray(players)){
 
         playersElement.innerHTML =
             `
-            <div class="empty">
-                No players online.
-            </div>
+                <div class="empty">
+                    No players online.
+                </div>
             `;
 
         return;
-
     }
 
 
     const others =
         players.filter(
             player =>
-                player.socketId !==
-                socket.id
+                player.socketId !== socket.id
         );
 
 
-    if(
-        others.length === 0
-    ){
+    if(others.length === 0){
 
         playersElement.innerHTML =
             `
-            <div class="empty">
-                No other players online.
-            </div>
+                <div class="empty">
+                    No other players online.
+                </div>
             `;
 
         return;
-
     }
 
 
@@ -821,64 +824,43 @@ function showPlayers(
         player => {
 
             const row =
-                document.createElement(
-                    "div"
-                );
-
+                document.createElement("div");
 
             row.className =
                 "player-row";
 
 
             const info =
-                document.createElement(
-                    "div"
-                );
-
+                document.createElement("div");
 
             info.className =
                 "player-info";
 
 
             const dot =
-                document.createElement(
-                    "span"
-                );
-
+                document.createElement("span");
 
             dot.className =
                 "online-dot";
 
 
             const name =
-                document.createElement(
-                    "span"
-                );
-
+                document.createElement("span");
 
             name.textContent =
                 player.id;
 
 
-            info.appendChild(
-                dot
-            );
+            info.appendChild(dot);
 
-
-            info.appendChild(
-                name
-            );
+            info.appendChild(name);
 
 
             const button =
-                document.createElement(
-                    "button"
-                );
-
+                document.createElement("button");
 
             button.className =
                 "challenge-button";
-
 
             button.textContent =
                 "PLAY CHESS";
@@ -894,19 +876,11 @@ function showPlayers(
                 };
 
 
-            row.appendChild(
-                info
-            );
+            row.appendChild(info);
 
+            row.appendChild(button);
 
-            row.appendChild(
-                button
-            );
-
-
-            playersElement.appendChild(
-                row
-            );
+            playersElement.appendChild(row);
 
         }
     );
@@ -916,27 +890,28 @@ function showPlayers(
 
 /* =====================================================
    SEND REQUEST
-===================================================== */
+   ===================================================== */
 
-function sendRequest(
-    targetSocketId
-){
+function sendRequest(targetSocketId){
 
-    if(
-        !socket.connected
-    ){
+    if(!socket.connected){
 
         alert(
             "DuoPlay is not connected."
         );
 
         return;
+    }
 
+
+    if(gameStarting){
+
+        return;
     }
 
 
     console.log(
-        "Sending request:",
+        "Sending chess request:",
         targetSocketId
     );
 
@@ -960,14 +935,14 @@ function sendRequest(
 
 /* =====================================================
    RECEIVE REQUEST
-===================================================== */
+   ===================================================== */
 
 socket.on(
     "playRequest",
     data => {
 
         console.log(
-            "Play request:",
+            "Play request received:",
             data
         );
 
@@ -991,22 +966,19 @@ socket.on(
 
 /* =====================================================
    ACCEPT
-===================================================== */
+   ===================================================== */
 
 acceptButton.onclick =
     () => {
 
-        if(
-            !currentRequest
-        ){
+        if(!currentRequest){
 
             return;
-
         }
 
 
         console.log(
-            "Accepting:",
+            "Accepting request:",
             currentRequest.fromSocketId
         );
 
@@ -1017,8 +989,7 @@ acceptButton.onclick =
         );
 
 
-        currentRequest =
-            null;
+        currentRequest = null;
 
 
         requestOverlay.classList.remove(
@@ -1039,14 +1010,12 @@ acceptButton.onclick =
 
 /* =====================================================
    DECLINE
-===================================================== */
+   ===================================================== */
 
 declineButton.onclick =
     () => {
 
-        if(
-            currentRequest
-        ){
+        if(currentRequest){
 
             socket.emit(
                 "declineRequest",
@@ -1056,8 +1025,7 @@ declineButton.onclick =
         }
 
 
-        currentRequest =
-            null;
+        currentRequest = null;
 
 
         requestOverlay.classList.remove(
@@ -1069,7 +1037,7 @@ declineButton.onclick =
 
 /* =====================================================
    GAME READY
-===================================================== */
+   ===================================================== */
 
 socket.on(
     "gameReady",
@@ -1080,56 +1048,54 @@ socket.on(
         );
 
         console.log(
-            "GAME READY"
+            "CHESS GAME READY"
         );
 
-        console.log(
-            data
-        );
+        console.log(data);
 
         console.log(
             "================================"
         );
 
 
-        if(
-            gameStarting
-        ){
+        if(gameStarting){
 
             return;
+        }
+
+
+        gameStarting = true;
+
+
+        /*
+         * Save room
+         */
+
+        if(data.roomId){
+
+            localStorage.setItem(
+                "duoplayRoomId",
+                data.roomId
+            );
 
         }
 
 
-        gameStarting =
-            true;
-
-
         /*
-         * Save complete game information.
+         * Save complete game data
          */
-
-        localStorage.setItem(
-            "duoplayRoomId",
-            data.roomId
-        );
-
 
         localStorage.setItem(
             "duoplayGame",
-            JSON.stringify(
-                data
-            )
+            JSON.stringify(data)
         );
 
 
         /*
-         * Save our player ID again.
+         * Save player ID
          */
 
-        if(
-            myId
-        ){
+        if(myId){
 
             localStorage.setItem(
                 "duoplayPlayerId",
@@ -1143,11 +1109,6 @@ socket.on(
             "Opening chess...";
 
 
-        /*
-         * Give localStorage a moment
-         * before changing pages.
-         */
-
         setTimeout(
             () => {
 
@@ -1155,7 +1116,7 @@ socket.on(
                     "chess.html";
 
             },
-            150
+            300
         );
 
     }
@@ -1164,7 +1125,7 @@ socket.on(
 
 /* =====================================================
    REQUEST DECLINED
-===================================================== */
+   ===================================================== */
 
 socket.on(
     "requestDeclined",
@@ -1184,8 +1145,8 @@ socket.on(
 
 
 /* =====================================================
-   ERROR
-===================================================== */
+   REQUEST ERROR
+   ===================================================== */
 
 socket.on(
     "requestError",
@@ -1213,7 +1174,7 @@ socket.on(
 
 /* =====================================================
    DISCONNECT
-===================================================== */
+   ===================================================== */
 
 socket.on(
     "disconnect",
@@ -1224,29 +1185,67 @@ socket.on(
             reason
         );
 
+
+        connectionStatus.textContent =
+            "● Disconnected";
+
+        connectionStatus.className =
+            "connection-status offline";
+
+    }
+);
+
+
+/* =====================================================
+   RECONNECTING
+   ===================================================== */
+
+socket.io.on(
+    "reconnect_attempt",
+    attempt => {
+
+        console.log(
+            "Reconnecting...",
+            attempt
+        );
+
+
+        connectionStatus.textContent =
+            "Connecting...";
+
+        connectionStatus.className =
+            "connection-status offline";
+
     }
 );
 
 
 /* =====================================================
    CONNECTION ERROR
-===================================================== */
+   ===================================================== */
 
 socket.on(
     "connect_error",
     error => {
 
         console.error(
-            "Connection error:",
-            error
+            "DuoPlay connection error:",
+            error.message
         );
+
+
+        connectionStatus.textContent =
+            "● Connection error";
+
+        connectionStatus.className =
+            "connection-status offline";
 
 
         playersElement.innerHTML =
             `
-            <div class="empty">
-                Cannot connect to DuoPlay server.
-            </div>
+                <div class="empty">
+                    Cannot connect to DuoPlay server.
+                </div>
             `;
 
     }
@@ -1255,25 +1254,34 @@ socket.on(
 
 /* =====================================================
    CHESS BUTTON
-===================================================== */
+   ===================================================== */
 
 document
-    .getElementById(
-        "chessButton"
-    )
+    .getElementById("chessButton")
     .onclick =
     () => {
 
         document
-            .querySelector(
-                ".players-section"
-            )
+            .querySelector(".players-section")
             .scrollIntoView({
-                behavior:
-                    "smooth"
+                behavior:"smooth"
             });
 
     };
+
+
+/* =====================================================
+   DEBUG
+   ===================================================== */
+
+console.log(
+    "DuoPlay games.html loaded."
+);
+
+console.log(
+    "Connecting to:",
+    SERVER
+);
 
 </script>
 
