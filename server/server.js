@@ -6,6 +6,16 @@ const path = require("path");
 const app = express();
 const server = http.createServer(app);
 
+// --------------------------------------------------
+// PATHS
+// --------------------------------------------------
+
+const ROOT_DIR = path.join(__dirname, "..");
+
+// --------------------------------------------------
+// SOCKET.IO
+// --------------------------------------------------
+
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -13,14 +23,56 @@ const io = new Server(server, {
   }
 });
 
+// --------------------------------------------------
+// PORT
+// --------------------------------------------------
+
 const PORT = process.env.PORT || 3000;
 
+// --------------------------------------------------
+// EXPRESS
+// --------------------------------------------------
+
 app.use(express.json());
-app.use(express.static(path.join(__dirname)));
+
+// Serve the main DuoPlay files
+app.use(express.static(ROOT_DIR));
+
+// --------------------------------------------------
+// HOME
+// --------------------------------------------------
 
 app.get("/", (req, res) => {
-  res.send("DuoPlay multiplayer server is running.");
+  res.sendFile(path.join(ROOT_DIR, "index.html"));
 });
+
+// --------------------------------------------------
+// CHESS
+// --------------------------------------------------
+
+app.get("/chess", (req, res) => {
+  res.sendFile(path.join(ROOT_DIR, "chess.html"));
+});
+
+app.get("/chess.html", (req, res) => {
+  res.sendFile(path.join(ROOT_DIR, "chess.html"));
+});
+
+// --------------------------------------------------
+// GAMES
+// --------------------------------------------------
+
+app.get("/games", (req, res) => {
+  res.sendFile(path.join(ROOT_DIR, "games.html"));
+});
+
+app.get("/games.html", (req, res) => {
+  res.sendFile(path.join(ROOT_DIR, "games.html"));
+});
+
+// --------------------------------------------------
+// HEALTH CHECK
+// --------------------------------------------------
 
 app.get("/health", (req, res) => {
   res.json({
@@ -45,6 +97,7 @@ function createRoom(roomId) {
   };
 
   rooms.set(roomId, room);
+
   return room;
 }
 
@@ -149,7 +202,7 @@ io.on("connection", (socket) => {
       return;
     }
 
-    let room = getRoom(roomId);
+    const room = getRoom(roomId);
 
     if (!room) {
       if (typeof callback === "function") {
@@ -218,7 +271,7 @@ io.on("connection", (socket) => {
       `${player.name} joined room ${roomId}`
     );
 
-    // Start game when two players are present.
+    // Start game when two players are present
     if (room.players.size === 2) {
       room.game = {
         started: true,
@@ -507,5 +560,9 @@ app.use((err, req, res, next) => {
 server.listen(PORT, "0.0.0.0", () => {
   console.log(
     `DuoPlayServer running on port ${PORT}`
+  );
+
+  console.log(
+    `Serving DuoPlay files from: ${ROOT_DIR}`
   );
 });
