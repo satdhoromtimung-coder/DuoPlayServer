@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DuoPlay</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #83c9c1;
+}
+
+/* ================= WORLD ================= */
+
+.world {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            180deg,
+            #83cfce 0%,
+            #a8ded0 42%,
+            #75ae78 70%,
+            #285a3b 100%
+        );
+}
+
+/* ================= SKY ================= */
+
+.sky-glow {
+    position: absolute;
+
+    width: 650px;
+    height: 650px;
+
+    right: -100px;
+    top: -230px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,244,176,.85) 0%,
+            rgba(255,232,145,.35) 30%,
+            rgba(255,230,150,0) 70%
+        );
+
+    filter: blur(8px);
+
+    animation: sunPulse 6s ease-in-out infinite;
+}
+
+.sun {
+    position: absolute;
+
+    width: 145px;
+    height: 145px;
+
+    right: 9%;
+    top: 8%;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            #fffde1 0%,
+            #fff2ad 50%,
+            #ffd967 100%
+        );
+
+    box-shadow:
+        0 0 45px #ffe89a,
+        0 0 100px rgba(255,231,133,.65);
+
+    animation: sunFloat 7s ease-in-out infinite;
+}
+
+/* ================= CLOUDS ================= */
+
+.cloud {
+    position: absolute;
+
+    width: 190px;
+    height: 52px;
+
+    border-radius: 50px;
+
+    background: rgba(255,255,255,.62);
+
+    opacity: .8;
+
+    z-index: 3;
+
+    animation: cloudMove linear infinite;
+}
+
+.cloud span {
+    position: absolute;
+
+    border-radius: 50%;
+
+    background: rgba(255,255,255,.67);
+}
+
+.cloud span:nth-child(1) {
+    width: 75px;
+    height: 75px;
+    left: 20px;
+    bottom: 5px;
+}
+
+.cloud span:nth-child(2) {
+    width: 95px;
+    height: 95px;
+    left: 70px;
+    bottom: 3px;
+}
+
+.cloud span:nth-child(3) {
+    width: 65px;
+    height: 65px;
+    right: 15px;
+    bottom: 3px;
+}
+
+.cloud.one {
+    top: 10%;
+    left: -250px;
+    animation-duration: 48s;
+}
+
+.cloud.two {
+    top: 24%;
+    left: -300px;
+    transform: scale(.65);
+    opacity: .45;
+    animation-duration: 62s;
+    animation-delay: -20s;
+}
+
+.cloud.three {
+    top: 5%;
+    left: -400px;
+    transform: scale(.48);
+    opacity: .35;
+    animation-duration: 70s;
+    animation-delay: -35s;
+}
+
+/* ================= MOUNTAINS ================= */
+
+.mountains {
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 28%;
+
+    height: 48%;
+
+    z-index: 4;
+}
+
+.mountain {
+    position: absolute;
+
+    bottom: 0;
+
+    width: 0;
+    height: 0;
+
+    border-left: 240px solid transparent;
+    border-right: 240px solid transparent;
+    border-bottom: 390px solid #789d96;
+}
+
+.mountain::before {
+    content: "";
+
+    position: absolute;
+
+    left: -240px;
+    top: 0;
+
+    width: 0;
+    height: 0;
+
+    border-left: 240px solid transparent;
+    border-right: 240px solid transparent;
+    border-bottom: 155px solid rgba(255,255,255,.72);
+}
+
+.mountain::after {
+    content: "";
+
+    position: absolute;
+
+    left: -72px;
+    top: 95px;
+
+    width: 0;
+    height: 0;
+
+    border-left: 72px solid transparent;
+    border-right: 72px solid transparent;
+    border-bottom: 120px solid rgba(90,125,119,.55);
+}
+
+.m1 {
+    left: -180px;
+    transform: scale(1.05);
+}
+
+.m2 {
+    left: 14%;
+    transform: scale(.78);
+    border-bottom-color: #6d938d;
+}
+
+.m3 {
+    left: 37%;
+    transform: scale(1.18);
+    border-bottom-color: #527c76;
+}
+
+.m4 {
+    left: 65%;
+    transform: scale(.82);
+    border-bottom-color: #739990;
+}
+
+.m5 {
+    left: 84%;
+    transform: scale(1.12);
+    border-bottom-color: #547b72;
+}
+
+/* ================= MIST ================= */
+
+.mist {
+    position: absolute;
+
+    left: 0;
+    right: 0;
+
+    bottom: 40%;
+
+    height: 90px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,.30),
+            transparent
+        );
+
+    filter: blur(18px);
+
+    z-index: 6;
+
+    animation: mistMove 8s ease-in-out infinite;
+}
+
+/* ================= FOREST ================= */
+
+.forest {
+    position: absolute;
+
+    left: 0;
+    right: 0;
+
+    bottom: 25%;
+
+    height: 25%;
+
+    z-index: 7;
+}
+
+.tree {
+    position: absolute;
+
+    bottom: 0;
+
+    width: 0;
+    height: 0;
+
+    border-left: 38px solid transparent;
+    border-right: 38px solid transparent;
+    border-bottom: 145px solid #245d42;
+
+    transform-origin: bottom center;
+
+    animation:
+        treeSway 4s ease-in-out infinite;
+}
+
+.tree::before {
+    content: "";
+
+    position: absolute;
+
+    left: -31px;
+    top: 42px;
+
+    border-left: 31px solid transparent;
+    border-right: 31px solid transparent;
+    border-bottom: 105px solid #32734d;
+}
+
+.tree::after {
+    content: "";
+
+    position: absolute;
+
+    left: -23px;
+    top: 83px;
+
+    border-left: 23px solid transparent;
+    border-right: 23px solid transparent;
+    border-bottom: 80px solid #41835a;
+}
+
+/* ================= RIVER ================= */
+
+.river {
+    position: absolute;
+
+    left: 25%;
+    right: 25%;
+
+    bottom: -10%;
+
+    height: 47%;
+
+    z-index: 9;
+
+    background:
+        linear-gradient(
+            90deg,
+            #64aeb4,
+            #a9e1e1 45%,
+            #65b3bb
+        );
+
+    clip-path:
+        polygon(
+            42% 0,
+            58% 0,
+            82% 100%,
+            18% 100%
+        );
+}
+
+.river::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        repeating-linear-gradient(
+            175deg,
+            transparent 0 25px,
+            rgba(255,255,255,.25) 26px 29px,
+            transparent 30px 50px
+        );
+
+    animation: waterMove 3s linear infinite;
+}
+
+/* ================= GROUND ================= */
+
+.ground {
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    height: 32%;
+
+    z-index: 10;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(52,116,61,.1),
+            rgba(20,62,34,.62)
+        );
+}
+
+/* ================= FLOWERS ================= */
+
+.flower {
+    position: absolute;
+
+    width: 12px;
+    height: 12px;
+
+    border-radius: 50%;
+
+    background: #fff5fa;
+
+    box-shadow:
+        0 -8px 0 #ffc9dc,
+        8px 0 0 #ffc9dc,
+        0 8px 0 #ffc9dc,
+        -8px 0 0 #ffc9dc;
+
+    z-index: 20;
+
+    animation:
+        flowerSway 3s ease-in-out infinite;
+}
+
+.flower::after {
+    content: "";
+
+    position: absolute;
+
+    left: 4px;
+    top: 4px;
+
+    width: 5px;
+    height: 5px;
+
+    border-radius: 50%;
+
+    background: #ffd452;
+}
+
+/* ================= GRASS ================= */
+
+.grass {
+    position: absolute;
+
+    inset: auto 0 0;
+
+    height: 17%;
+
+    z-index: 22;
+}
+
+.blade {
+    position: absolute;
+
+    bottom: 0;
+
+    width: 3px;
+
+    background: #2c7043;
+
+    border-radius: 100%;
+
+    transform-origin: bottom;
+
+    animation:
+        grassWave ease-in-out infinite;
+}
+
+/* ================= BIRDS ================= */
+
+.birds {
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 13;
+
+    pointer-events: none;
+}
+
+.bird {
+    position: absolute;
+
+    width: 30px;
+    height: 15px;
+
+    animation: birdFly linear infinite;
+}
+
+.bird::before,
+.bird::after {
+    content: "";
+
+    position: absolute;
+
+    width: 15px;
+    height: 8px;
+
+    top: 5px;
+
+    border-top:
+        3px solid
+        rgba(35,56,54,.72);
+
+    border-radius: 50%;
+}
+
+.bird::before {
+    left: 0;
+    transform: rotate(15deg);
+}
+
+.bird::after {
+    right: 0;
+    transform: rotate(-15deg);
+}
+
+.bird.one {
+    top: 19%;
+    left: -50px;
+    animation-duration: 20s;
+}
+
+.bird.two {
+    top: 27%;
+    left: -100px;
+    transform: scale(.65);
+    animation-duration: 25s;
+    animation-delay: -8s;
+}
+
+.bird.three {
+    top: 13%;
+    left: -170px;
+    transform: scale(.5);
+    animation-duration: 28s;
+    animation-delay: -16s;
+}
+
+/* ================= FALLING LEAVES ================= */
+
+.leaves {
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 24;
+
+    pointer-events: none;
+}
+
+.leaf {
+    position: absolute;
+
+    width: 23px;
+    height: 12px;
+
+    border-radius:
+        100% 0 100% 0;
+
+    background:
+        linear-gradient(
+            135deg,
+            #dce98b,
+            #668d4b
+        );
+
+    box-shadow:
+        0 3px 6px rgba(0,0,0,.22);
+
+    opacity: 0;
+
+    animation:
+        leafFall linear infinite;
+}
+
+/* ================= FIREFLIES ================= */
+
+.fireflies {
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 25;
+
+    pointer-events: none;
+}
+
+.firefly {
+    position: absolute;
+
+    width: 5px;
+    height: 5px;
+
+    border-radius: 50%;
+
+    background: #fff2a5;
+
+    box-shadow:
+        0 0 12px 4px
+        rgba(255,228,122,.7);
+
+    animation:
+        fireflyFloat ease-in-out infinite;
+}
+
+/* =====================================================
+   CHESS PIECES
+===================================================== */
+
+.chess {
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 27;
+
+    pointer-events: none;
+}
+
+.chess-piece {
+    position: absolute;
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-weight: 900;
+
+    line-height: 1;
+
+    color: #fff3c7;
+
+    text-shadow:
+        -2px -2px 0 #352818,
+         2px -2px 0 #352818,
+        -2px  2px 0 #352818,
+         2px  2px 0 #352818,
+
+        0 5px 0 #8c6831,
+
+        0 10px 18px
+        rgba(0,0,0,.75),
+
+        0 0 25px
+        rgba(255,222,130,.7);
+
+    filter:
+        drop-shadow(
+            0 7px 7px
+            rgba(0,0,0,.45)
+        );
+
+    animation:
+        chessFloat 5s ease-in-out infinite;
+}
+
+
+/* KING */
+
+.king {
+    left: 7%;
+    top: 30%;
+
+    font-size: 94px;
+}
+
+
+/* QUEEN */
+
+.queen {
+    right: 7%;
+    top: 28%;
+
+    font-size: 90px;
+
+    animation-delay: -2s;
+}
+
+
+/* KNIGHT */
+
+.knight {
+    left: 11%;
+    bottom: 17%;
+
+    font-size: 76px;
+
+    animation-delay: -3.5s;
+}
+
+
+/* =====================================================
+   ROOK
+   Replaced the bishop
+===================================================== */
+
+.rook {
+    right: 11%;
+    bottom: 18%;
+
+    font-size: 78px;
+
+    animation-delay: -1s;
+}
+
+
+/* ================= CENTER ================= */
+
+.content {
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 40;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+}
+
+.card {
+    position: relative;
+
+    width: min(680px, 91vw);
+
+    min-height: 390px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    padding: 45px;
+
+    text-align: center;
+
+    border-radius: 34px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.38);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.23),
+            rgba(23,57,48,.38)
+        );
+
+    backdrop-filter:
+        blur(17px)
+        saturate(130%);
+
+    -webkit-backdrop-filter:
+        blur(17px)
+        saturate(130%);
+
+    box-shadow:
+        0 35px 90px
+        rgba(0,0,0,.34),
+
+        inset 0 1px
+        rgba(255,255,255,.38),
+
+        inset 0 -1px
+        rgba(0,0,0,.15);
+
+    overflow: hidden;
+
+    animation:
+        cardAppear 1.2s
+        cubic-bezier(.16,1,.3,1);
+}
+
+.card::after {
+    content: "";
+
+    position: absolute;
+
+    top: -50%;
+    left: -80%;
+
+    width: 45%;
+    height: 200%;
+
+    transform: rotate(20deg);
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,.13),
+            transparent
+        );
+
+    animation:
+        cardShine 7s ease-in-out infinite;
+}
+
+/* ================= LABEL ================= */
+
+.label {
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    padding:
+        9px 17px;
+
+    border-radius: 999px;
+
+    color:
+        rgba(255,255,255,.92);
+
+    background:
+        rgba(20,42,36,.35);
+
+    border:
+        1px solid
+        rgba(255,255,255,.16);
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 2px;
+
+    text-transform: uppercase;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: #82efa2;
+
+    box-shadow:
+        0 0 13px
+        #82efa2;
+
+    animation:
+        dotPulse 2s ease-in-out infinite;
+}
+
+/* ================= LOGO ================= */
+
+.logo {
+    position: relative;
+
+    margin-top: 25px;
+
+    font-size:
+        clamp(65px, 10vw, 112px);
+
+    line-height: .9;
+
+    font-weight: 950;
+
+    letter-spacing: -5px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #fffbe7 0%,
+            #ffeeb2 38%,
+            #d79d4d 76%,
+            #9d6727 100%
+        );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    color: transparent;
+
+    filter:
+        drop-shadow(
+            0 8px 3px
+            rgba(77,46,17,.42)
+        )
+        drop-shadow(
+            0 16px 24px
+            rgba(0,0,0,.35)
+        );
+
+    animation:
+        logoFloat 5s ease-in-out infinite;
+}
+
+/* ================= BUTTON ================= */
+
+.enter {
+    position: relative;
+
+    margin-top: 36px;
+
+    min-width: 255px;
+
+    padding:
+        18px 28px;
+
+    border: none;
+
+    border-radius: 17px;
+
+    cursor: pointer;
+
+    overflow: hidden;
+
+    color: #21180c;
+
+    font-size: 15px;
+
+    font-weight: 900;
+
+    background:
+        linear-gradient(
+            135deg,
+            #fff2bf,
+            #e5b461
+        );
+
+    box-shadow:
+        0 17px 35px
+        rgba(0,0,0,.32),
+
+        inset 0 1px
+        rgba(255,255,255,.7),
+
+        inset 0 -2px
+        rgba(129,81,28,.16);
+
+    transition:
+        transform .25s ease,
+        box-shadow .25s ease;
+}
+
+.enter span {
+    position: relative;
+    z-index: 2;
+}
+
+.enter::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    bottom: 0;
+
+    left: -80%;
+
+    width: 50%;
+
+    transform: skewX(-22deg);
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,.75),
+            transparent
+        );
+
+    animation:
+        buttonShine 4s infinite;
+}
+
+.enter:hover {
+    transform:
+        translateY(-5px)
+        scale(1.035);
+
+    box-shadow:
+        0 24px 50px
+        rgba(0,0,0,.38),
+
+        0 0 35px
+        rgba(255,220,130,.32);
+}
+
+.enter:active {
+    transform:
+        translateY(0)
+        scale(.98);
+}
+
+/* ================= TRANSITION ================= */
+
+.transition {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 100;
+
+    background:
+        radial-gradient(
+            circle at center,
+            #426d59,
+            #08130e 72%
+        );
+
+    transform:
+        translateY(100%);
+
+    pointer-events: none;
+}
+
+.transition.active {
+    animation:
+        roomTransition .9s
+        cubic-bezier(.7,0,.2,1)
+        forwards;
+}
+
+/* ================= ANIMATIONS ================= */
+
+@keyframes sunPulse {
+    0%,100% {
+        transform: scale(.95);
+        opacity: .8;
+    }
+
+    50% {
+        transform: scale(1.08);
+        opacity: 1;
+    }
+}
+
+@keyframes sunFloat {
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(8px);
+    }
+}
+
+@keyframes cloudMove {
+    from {
+        margin-left: 0;
+    }
+
+    to {
+        margin-left: calc(100vw + 500px);
+    }
+}
+
+@keyframes mistMove {
+    0%,100% {
+        transform: translateX(-30px);
+        opacity: .25;
+    }
+
+    50% {
+        transform: translateX(30px);
+        opacity: .6;
+    }
+}
+
+@keyframes treeSway {
+    0%,100% {
+        transform: rotate(-1deg);
+    }
+
+    50% {
+        transform: rotate(1deg);
+    }
+}
+
+@keyframes waterMove {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 160px 0;
+    }
+}
+
+@keyframes flowerSway {
+    0%,100% {
+        transform: rotate(-5deg);
+    }
+
+    50% {
+        transform: rotate(7deg);
+    }
+}
+
+@keyframes grassWave {
+    0%,100% {
+        transform: rotate(-9deg);
+    }
+
+    50% {
+        transform: rotate(11deg);
+    }
+}
+
+@keyframes birdFly {
+    0% {
+        transform:
+            translateX(0)
+            translateY(0);
+    }
+
+    25% {
+        transform:
+            translateX(28vw)
+            translateY(-28px);
+    }
+
+    50% {
+        transform:
+            translateX(55vw)
+            translateY(15px);
+    }
+
+    75% {
+        transform:
+            translateX(82vw)
+            translateY(-20px);
+    }
+
+    100% {
+        transform:
+            translateX(120vw)
+            translateY(0);
+    }
+}
+
+@keyframes leafFall {
+    0% {
+        top: -10%;
+        opacity: 0;
+
+        transform:
+            translateX(0)
+            rotate(0deg);
+    }
+
+    10% {
+        opacity: .9;
+    }
+
+    50% {
+        transform:
+            translateX(100px)
+            rotate(180deg);
+    }
+
+    100% {
+        top: 110%;
+        opacity: 0;
+
+        transform:
+            translateX(-80px)
+            rotate(360deg);
+    }
+}
+
+@keyframes fireflyFloat {
+    0%,100% {
+        opacity: .15;
+
+        transform:
+            translate(0,0)
+            scale(.7);
+    }
+
+    50% {
+        opacity: 1;
+
+        transform:
+            translate(16px,-22px)
+            scale(1.35);
+    }
+}
+
+@keyframes chessFloat {
+    0%,100% {
+        transform:
+            translateY(0)
+            rotate(-4deg);
+    }
+
+    50% {
+        transform:
+            translateY(-20px)
+            rotate(4deg);
+    }
+}
+
+@keyframes cardAppear {
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(45px)
+            scale(.92);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+}
+
+@keyframes cardShine {
+    0%,55% {
+        left: -80%;
+    }
+
+    75%,100% {
+        left: 150%;
+    }
+}
+
+@keyframes logoFloat {
+    0%,100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes dotPulse {
+    0%,100% {
+        transform: scale(.8);
+        opacity: .7;
+    }
+
+    50% {
+        transform: scale(1.15);
+        opacity: 1;
+    }
+}
+
+@keyframes buttonShine {
+    0%,55% {
+        left: -80%;
+    }
+
+    75%,100% {
+        left: 150%;
+    }
+}
+
+@keyframes roomTransition {
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 700px) {
+
+    .card {
+        width: 92vw;
+        min-height: 350px;
+        padding: 35px 20px;
+    }
+
+    .logo {
+        font-size: 72px;
+        letter-spacing: -4px;
+    }
+
+    .enter {
+        min-width: 220px;
+        padding: 16px 20px;
+    }
+
+    .king {
+        left: 2%;
+        top: 25%;
+        font-size: 58px;
+    }
+
+    .queen {
+        right: 2%;
+        top: 24%;
+        font-size: 56px;
+    }
+
+    .knight {
+        left: 5%;
+        bottom: 13%;
+        font-size: 52px;
+    }
+
+    .rook {
+        right: 5%;
+        bottom: 15%;
+        font-size: 54px;
+    }
+
+    .mountain {
+        border-left-width: 155px;
+        border-right-width: 155px;
+        border-bottom-width: 260px;
+    }
+
+    .mountain::before {
+        left: -155px;
+
+        border-left-width: 155px;
+        border-right-width: 155px;
+        border-bottom-width: 105px;
+    }
+
+    .mountain::after {
+        left: -50px;
+
+        border-left-width: 50px;
+        border-right-width: 50px;
+        border-bottom-width: 85px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="world">
+
+    <!-- SKY -->
+
+    <div class="sky-glow"></div>
+
+    <div class="sun"></div>
+
+
+    <!-- CLOUDS -->
+
+    <div class="cloud one">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <div class="cloud two">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+    <div class="cloud three">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+
+    <!-- MOUNTAINS -->
+
+    <div class="mountains">
+
+        <div class="mountain m1"></div>
+        <div class="mountain m2"></div>
+        <div class="mountain m3"></div>
+        <div class="mountain m4"></div>
+        <div class="mountain m5"></div>
+
+    </div>
+
+
+    <!-- MIST -->
+
+    <div class="mist"></div>
+
+
+    <!-- FOREST -->
+
+    <div class="forest">
+
+        <div class="tree" style="left:2%"></div>
+        <div class="tree" style="left:9%;transform:scale(.7)"></div>
+        <div class="tree" style="left:17%;transform:scale(1.1)"></div>
+        <div class="tree" style="left:27%;transform:scale(.72)"></div>
+        <div class="tree" style="left:36%;transform:scale(.9)"></div>
+
+        <div class="tree" style="left:66%;transform:scale(.75)"></div>
+        <div class="tree" style="left:74%;transform:scale(1.15)"></div>
+        <div class="tree" style="left:84%;transform:scale(.75)"></div>
+        <div class="tree" style="left:93%;transform:scale(1.1)"></div>
+
+    </div>
+
+
+    <!-- RIVER -->
+
+    <div class="river"></div>
+
+
+    <!-- GROUND -->
+
+    <div class="ground"></div>
+
+
+    <!-- FLOWERS -->
+
+    <div class="flower" style="left:5%;bottom:18%"></div>
+    <div class="flower" style="left:12%;bottom:10%"></div>
+    <div class="flower" style="left:20%;bottom:20%"></div>
+    <div class="flower" style="left:30%;bottom:12%"></div>
+    <div class="flower" style="left:42%;bottom:18%"></div>
+    <div class="flower" style="left:56%;bottom:12%"></div>
+    <div class="flower" style="left:67%;bottom:20%"></div>
+    <div class="flower" style="left:77%;bottom:13%"></div>
+    <div class="flower" style="left:88%;bottom:20%"></div>
+    <div class="flower" style="left:96%;bottom:10%"></div>
+
+
+    <!-- BIRDS -->
+
+    <div class="birds">
+
+        <div class="bird one"></div>
+        <div class="bird two"></div>
+        <div class="bird three"></div>
+
+    </div>
+
+
+    <!-- FALLING LEAVES -->
+
+    <div class="leaves">
+
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+        <div class="leaf"></div>
+
+    </div>
+
+
+    <!-- FIREFLIES -->
+
+    <div
+        class="fireflies"
+        id="fireflies">
+    </div>
+
+
+    <!-- CHESS PIECES -->
+
+    <div class="chess">
+
+        <!-- KING -->
+
+        <div class="chess-piece king">
+            ♔
+        </div>
+
+        <!-- QUEEN -->
+
+        <div class="chess-piece queen">
+            ♕
+        </div>
+
+        <!-- KNIGHT -->
+
+        <div class="chess-piece knight">
+            ♞
+        </div>
+
+        <!-- ROOK - REPLACED BISHOP -->
+
+        <div class="chess-piece rook">
+            ♜
+        </div>
+
+    </div>
+
+
+    <!-- WATER -->
+
+    <div
+        class="water-sparkle"
+        style="left:42%;bottom:24%">
+    </div>
+
+    <div
+        class="water-sparkle"
+        style="left:50%;bottom:18%">
+    </div>
+
+    <div
+        class="water-sparkle"
+        style="left:46%;bottom:31%">
+    </div>
+
+
+    <!-- GRASS -->
+
+    <div
+        class="grass"
+        id="grass">
+    </div>
+
+
+    <!-- CENTER -->
+
+    <main class="content">
+
+        <section class="card">
+
+            <div class="label">
+
+                <span class="status-dot"></span>
+
+                PRIVATE GAME ROOM
+
+            </div>
+
+            <h1 class="logo">
+                DuoPlay
+            </h1>
+
+            <button
+                class="enter"
+                id="enterButton">
+
+                <span>
+                    Enter Game Room&nbsp; →
+                </span>
+
+            </button>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- TRANSITION -->
+
+<div
+    class="transition"
+    id="transition">
+</div>
+
+
+<script>
+
+/* =====================================================
+   GRASS GENERATOR
+===================================================== */
+
+const grass =
+    document.getElementById("grass");
+
+for (let i = 0; i < 120; i++) {
+
+    const blade =
+        document.createElement("span");
+
+    blade.className =
+        "blade";
+
+    blade.style.left =
+        Math.random() * 100 + "%";
+
+    blade.style.height =
+        (20 + Math.random() * 45) + "px";
+
+    blade.style.animationDuration =
+        (1.5 + Math.random() * 2) + "s";
+
+    blade.style.animationDelay =
+        (-Math.random() * 3) + "s";
+
+    grass.appendChild(blade);
+}
+
+
+/* =====================================================
+   FIREFLIES
+===================================================== */
+
+const fireflies =
+    document.getElementById("fireflies");
+
+for (let i = 0; i < 25; i++) {
+
+    const light =
+        document.createElement("span");
+
+    light.className =
+        "firefly";
+
+    light.style.left =
+        Math.random() * 100 + "%";
+
+    light.style.top =
+        (40 + Math.random() * 48) + "%";
+
+    light.style.animationDuration =
+        (3 + Math.random() * 4) + "s";
+
+    light.style.animationDelay =
+        (-Math.random() * 5) + "s";
+
+    fireflies.appendChild(light);
+}
+
+
+/* =====================================================
+   LEAVES
+===================================================== */
+
+const leaves =
+    document.querySelectorAll(".leaf");
+
+leaves.forEach((leaf) => {
+
+    leaf.style.left =
+        Math.random() * 100 + "%";
+
+    leaf.style.animationDuration =
+        (8 + Math.random() * 9) + "s";
+
+    leaf.style.animationDelay =
+        (-Math.random() * 12) + "s";
+
+});
+
+
+/* =====================================================
+   ENTER GAME ROOM
+===================================================== */
+
+const enterButton =
+    document.getElementById(
+        "enterButton"
+    );
+
+const transition =
+    document.getElementById(
+        "transition"
+    );
+
+enterButton.addEventListener(
+    "click",
+    () => {
+
+        transition.classList.add(
+            "active"
+        );
+
+        setTimeout(() => {
+
+            window.location.href =
+                "games.html";
+
+        }, 850);
+
+    }
+);
+
+</script>
+
+</body>
+</html>
