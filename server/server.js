@@ -1,10 +1,42 @@
 const express = require("express");
 const http = require("http");
-const { Server } = require("socket.io");
 const path = require("path");
+const { Server } = require("socket.io");
+const { Chess } = require("chess.js");
 
 const app = express();
 const server = http.createServer(app);
+
+const PORT = process.env.PORT || 3000;
+
+/* =========================================================
+   PATHS
+========================================================= */
+
+const ROOT = path.join(__dirname, "..");
+
+/* =========================================================
+   EXPRESS
+========================================================= */
+
+app.use(express.json());
+app.use(express.static(ROOT));
+
+app.get("/", (req, res) => {
+    res.sendFile(path.join(ROOT, "games.html"));
+});
+
+app.get("/health", (req, res) => {
+    res.json({
+        status: "ok",
+        players: players.size,
+        chessRooms: chessRooms.size
+    });
+});
+
+/* =========================================================
+   SOCKET.IO
+========================================================= */
 
 const io = new Server(server, {
     cors: {
@@ -13,923 +45,969 @@ const io = new Server(server, {
     }
 });
 
-const PORT = process.env.PORT || 3000;
-const ROOT_DIR = path.join(__dirname, "..");
+/* =========================================================
+   PERMANENT PLAYER IDs
+========================================================= */
 
-app.use(express.json());
-app.use(express.static(ROOT_DIR));
-
-/* =====================================================
-   PAGES
-===================================================== */
-
-app.get("/", (req, res) => {
-    res.sendFile(path.join(ROOT_DIR, "index.html"));
-});
-
-app.get("/games", (req, res) => {
-    res.sendFile(path.join(ROOT_DIR, "games.html"));
-});
-
-app.get("/games.html", (req, res) => {
-    res.sendFile(path.join(ROOT_DIR, "games.html"));
-});
-
-app.get("/chess", (req, res) => {
-    res.sendFile(path.join(ROOT_DIR, "chess.html"));
-});
-
-app.get("/chess.html", (req, res) => {
-    res.sendFile(path.join(ROOT_DIR, "chess.html"));
-});
-
-/* =====================================================
-   HEALTH
-===================================================== */
-
-app.get("/health", (req, res) => {
-    res.json({
-        status: "ok",
-        service: "DuoPlayServer",
-        players: io.engine.clientsCount,
-        rooms: rooms.size
-    });
-});
-
-/* =====================================================
-   ROOMS
-===================================================== */
-
-const rooms = new Map();
+const players = new Map();
 
 /*
-room = {
-    id,
-    players: Map(clientId -> player),
-    createdAt
-}
-
-player = {
-    clientId,
-    socketId,
-    name,
-    color,
-    connected
-}
+    socket.id -> {
+        playerId,
+        socketId
+    }
 */
 
-/* =====================================================
-   MATCHMAKING
-===================================================== */
+function generatePlayerId() {
 
-const chessQueue = [];
+    const chars =
+        "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-function createRoom() {
+    let id = "DP-";
+
+    for (let i = 0; i < 4; i++) {
+
+        id += chars[
+            Math.floor(
+                Math.random() * chars.length
+            )
+        ];
+
+    }
+
+    return id;
+}
+
+function createUniquePlayerId() {
+
+    let id;
+
+    do {
+        id = generatePlayerId();
+    } while (
+        [...players.values()].some(
+            player => player.playerId === id
+        )
+    );
+
+    return id;
+}
+
+/* =========================================================
+   SEND PLAYER LIST
+========================================================= */
+
+function sendPlayers() {
+
+    const list = [...players.values()].map(
+        player => ({
+            playerId: player.playerId,
+            socketId: player.socketId
+        })
+    );
+
+    io.emit("players", list);
+}
+
+/* =========================================================
+   CHESS
+========================================================= */
+
+const chessRooms = new Map();
+
+/*
+    roomId -> {
+
+        game,
+        white: {
+            socketId,
+            playerId
+        },
+        black: {
+            socketId,
+            playerId
+        }
+
+    }
+*/
+
+/* =========================================================
+   CHESS ROOM ID
+========================================================= */
+
+function createRoomId() {
+
+    let roomId;
+
+    do {
+
+        roomId =
+            "CHESS-" +
+            Math.random()
+                .toString(36)
+                .substring(2, 8)
+                .toUpperCase();
+
+    } while (
+        chessRooms.has(roomId)
+    );
+
+    return roomId;
+}
+
+/* =========================================================
+   CREATE CHESS ROOM
+========================================================= */
+
+function createChessRoom(
+    whiteSocket,
+    blackSocket
+) {
+
+    const whitePlayer =
+        players.get(
+            whiteSocket.id
+        );
+
+    const blackPlayer =
+        players.get(
+            blackSocket.id
+        );
+
+    if (
+        !whitePlayer ||
+        !blackPlayer
+    ) {
+        return null;
+    }
+
     const roomId =
-        "CHESS-" +
-        Math.random()
-            .toString(36)
-            .substring(2, 8)
-            .toUpperCase();
+        createRoomId();
 
     const room = {
-        id: roomId,
-        players: new Map(),
-        createdAt: Date.now()
+
+        roomId,
+
+        game: new Chess(),
+
+        white: {
+            socketId:
+                whiteSocket.id,
+
+            playerId:
+                whitePlayer.playerId
+        },
+
+        black: {
+            socketId:
+                blackSocket.id,
+
+            playerId:
+                blackPlayer.playerId
+        }
+
     };
 
-    rooms.set(roomId, room);
+    chessRooms.set(
+        roomId,
+        room
+    );
+
+    whiteSocket.join(roomId);
+    blackSocket.join(roomId);
+
+    whiteSocket.data.chessRoom =
+        roomId;
+
+    whiteSocket.data.chessColor =
+        "white";
+
+    blackSocket.data.chessRoom =
+        roomId;
+
+    blackSocket.data.chessColor =
+        "black";
 
     return room;
 }
 
-function getRoom(roomId) {
-    return rooms.get(roomId);
-}
+/* =========================================================
+   SEND GAME READY
+========================================================= */
 
-function removeFromQueue(socketId) {
-    for (let i = chessQueue.length - 1; i >= 0; i--) {
-        if (chessQueue[i].socketId === socketId) {
-            chessQueue.splice(i, 1);
-        }
-    }
-}
+function sendGameReady(room) {
 
-/* =====================================================
-   PLAYER HELPERS
-===================================================== */
+    const whiteSocket =
+        io.sockets.sockets.get(
+            room.white.socketId
+        );
 
-function getPlayerFromRoom(room, clientId) {
-    if (!room) return null;
+    const blackSocket =
+        io.sockets.sockets.get(
+            room.black.socketId
+        );
 
-    return room.players.get(clientId) || null;
-}
+    const common = {
 
-function roomPlayers(room) {
-    return Array.from(room.players.values()).map(player => ({
-        id: player.clientId,
-        socketId: player.socketId,
-        name: player.name,
-        color: player.color,
-        connected: player.connected
-    }));
-}
+        roomId:
+            room.roomId,
 
-function emitRoomUpdate(room) {
-    io.to(room.id).emit("room:update", {
-        roomId: room.id,
-        players: roomPlayers(room)
-    });
-}
+        fen:
+            room.game.fen(),
 
-/* =====================================================
-   START CHESS MATCH
-===================================================== */
+        turn: "white",
 
-function startChessMatch(first, second) {
+        whitePlayerId:
+            room.white.playerId,
 
-    const room = createRoom();
+        blackPlayerId:
+            room.black.playerId
 
-    const whitePlayer = {
-        clientId: first.clientId,
-        socketId: first.socketId,
-        name: first.name,
-        color: "white",
-        connected: true
     };
 
-    const blackPlayer = {
-        clientId: second.clientId,
-        socketId: second.socketId,
-        name: second.name,
-        color: "black",
-        connected: true
-    };
+    if (whiteSocket) {
 
-    room.players.set(
-        whitePlayer.clientId,
-        whitePlayer
-    );
+        whiteSocket.emit(
+            "gameReady",
+            {
+                ...common,
+                color: "white"
+            }
+        );
 
-    room.players.set(
-        blackPlayer.clientId,
-        blackPlayer
-    );
-
-    const firstSocket =
-        io.sockets.sockets.get(first.socketId);
-
-    const secondSocket =
-        io.sockets.sockets.get(second.socketId);
-
-    if (firstSocket) {
-        firstSocket.data.roomId = room.id;
-        firstSocket.data.clientId = first.clientId;
     }
 
-    if (secondSocket) {
-        secondSocket.data.roomId = room.id;
-        secondSocket.data.clientId = second.clientId;
+    if (blackSocket) {
+
+        blackSocket.emit(
+            "gameReady",
+            {
+                ...common,
+                color: "black"
+            }
+        );
+
     }
-
-    const data = {
-        roomId: room.id,
-
-        players: roomPlayers(room),
-
-        game: {
-            started: true,
-            turn: "white",
-            fen: "start"
-        }
-    };
-
-    if (firstSocket) {
-        firstSocket.emit("match:found", data);
-        firstSocket.emit("game:start", data);
-    }
-
-    if (secondSocket) {
-        secondSocket.emit("match:found", data);
-        secondSocket.emit("game:start", data);
-    }
-
-    console.log(
-        `Chess match created: ${room.id}`
-    );
-
-    console.log(
-        `${first.name} vs ${second.name}`
-    );
-
-    return room;
 }
 
-/* =====================================================
+/* =========================================================
    SOCKET CONNECTION
-===================================================== */
+========================================================= */
 
-io.on("connection", socket => {
+io.on(
+    "connection",
+    socket => {
 
-    console.log(
-        "Player connected:",
-        socket.id
-    );
+        console.log(
+            "Connected:",
+            socket.id
+        );
 
-    socket.emit("server:connected", {
-        socketId: socket.id,
-        message: "Connected to DuoPlay server."
-    });
+        /*
+         * Client sends its permanent ID
+         * through handshake.auth.playerId.
+         */
 
-    /* =================================================
-       REGISTER PLAYER
-    ================================================= */
+        let playerId =
+            socket.handshake.auth?.playerId;
 
-    socket.on(
-        "player:register",
-        (data = {}, callback) => {
+        /*
+         * If no ID exists, create one.
+         */
 
-            const clientId =
-                String(data.clientId || socket.id);
+        if (
+            !playerId ||
+            typeof playerId !== "string"
+        ) {
 
-            const name =
-                String(data.name || "Player");
+            playerId =
+                createUniquePlayerId();
 
-            socket.data.clientId = clientId;
+        }
 
-            socket.data.playerName = name;
+        playerId =
+            playerId.trim().toUpperCase();
 
-            console.log(
-                `Player registered: ${name} (${clientId})`
+        /*
+         * If this ID is already being used by
+         * another active connection, give this
+         * connection a new ID.
+         *
+         * Normally this will not happen because
+         * the browser keeps its permanent ID.
+         */
+
+        const existing =
+            [...players.entries()].find(
+                ([socketId, player]) =>
+                    socketId !== socket.id &&
+                    player.playerId === playerId
             );
 
-            if (typeof callback === "function") {
-                callback({
-                    success: true,
-                    clientId
-                });
-            }
+        if (existing) {
+
+            playerId =
+                createUniquePlayerId();
+
         }
-    );
 
-    /* =================================================
-       FIND CHESS OPPONENT
-    ================================================= */
+        players.set(
+            socket.id,
+            {
+                playerId,
+                socketId: socket.id
+            }
+        );
 
-    socket.on(
-        "chess:find",
-        (data = {}) => {
+        socket.data.playerId =
+            playerId;
 
-            const clientId =
-                String(
-                    data.clientId ||
-                    socket.data.clientId ||
-                    socket.id
-                );
+        /*
+         * Give the client its permanent ID.
+         */
 
-            const name =
-                String(
-                    data.name ||
-                    socket.data.playerName ||
-                    "Player"
-                );
+        socket.emit(
+            "yourId",
+            playerId
+        );
 
-            socket.data.clientId = clientId;
-            socket.data.playerName = name;
+        sendPlayers();
 
-            /*
-             * Already in a room
-             */
+        console.log(
+            "Player:",
+            playerId
+        );
 
-            if (socket.data.roomId) {
+        /* =====================================================
+           REFRESH / RECONNECT
+        ===================================================== */
 
-                const room =
-                    getRoom(socket.data.roomId);
+        socket.on(
+            "identify",
+            requestedId => {
 
-                if (room) {
+                if (
+                    !requestedId ||
+                    typeof requestedId !== "string"
+                ) {
+                    return;
+                }
+
+                const cleanId =
+                    requestedId
+                        .trim()
+                        .toUpperCase();
+
+                const duplicate =
+                    [...players.entries()].some(
+                        ([socketId, player]) =>
+                            socketId !== socket.id &&
+                            player.playerId === cleanId
+                    );
+
+                if (duplicate) {
 
                     socket.emit(
-                        "match:found",
-                        {
-                            roomId: room.id,
-                            players: roomPlayers(room)
-                        }
+                        "idError",
+                        "This Player ID is already online."
                     );
 
                     return;
                 }
-            }
 
-            /*
-             * Don't add the same socket
-             * to the queue twice.
-             */
-
-            removeFromQueue(socket.id);
-
-            /*
-             * Find another connected player.
-             */
-
-            let opponent = null;
-
-            while (chessQueue.length > 0) {
-
-                const candidate =
-                    chessQueue.shift();
-
-                const candidateSocket =
-                    io.sockets.sockets.get(
-                        candidate.socketId
+                const player =
+                    players.get(
+                        socket.id
                     );
 
-                if (
-                    candidateSocket &&
-                    candidateSocket.connected &&
-                    candidate.clientId !== clientId
-                ) {
-
-                    opponent = candidate;
-
-                    break;
+                if (!player) {
+                    return;
                 }
-            }
 
-            /*
-             * Nobody waiting.
-             */
+                player.playerId =
+                    cleanId;
 
-            if (!opponent) {
-
-                chessQueue.push({
-                    socketId: socket.id,
-                    clientId,
-                    name
-                });
+                socket.data.playerId =
+                    cleanId;
 
                 socket.emit(
-                    "match:waiting",
+                    "yourId",
+                    cleanId
+                );
+
+                sendPlayers();
+
+            }
+        );
+
+        /* =====================================================
+           GET ONLINE PLAYERS
+        ===================================================== */
+
+        socket.on(
+            "getPlayers",
+            () => {
+
+                sendPlayers();
+
+            }
+        );
+
+        /* =====================================================
+           PLAY REQUEST
+        ===================================================== */
+
+        socket.on(
+            "playRequest",
+            targetSocketId => {
+
+                if (
+                    !targetSocketId ||
+                    targetSocketId === socket.id
+                ) {
+                    return;
+                }
+
+                const target =
+                    io.sockets.sockets.get(
+                        targetSocketId
+                    );
+
+                if (!target) {
+
+                    socket.emit(
+                        "requestError",
+                        "Player is offline."
+                    );
+
+                    return;
+                }
+
+                /*
+                 * Don't allow requests while
+                 * already playing.
+                 */
+
+                if (
+                    socket.data.chessRoom
+                ) {
+
+                    socket.emit(
+                        "requestError",
+                        "You are already in a chess game."
+                    );
+
+                    return;
+                }
+
+                if (
+                    target.data.chessRoom
+                ) {
+
+                    socket.emit(
+                        "requestError",
+                        "That player is already playing."
+                    );
+
+                    return;
+                }
+
+                const sender =
+                    players.get(
+                        socket.id
+                    );
+
+                if (!sender) {
+                    return;
+                }
+
+                /*
+                 * Send request to exact player.
+                 */
+
+                target.emit(
+                    "playRequest",
                     {
-                        message:
-                            "Waiting for another player..."
+                        fromSocketId:
+                            socket.id,
+
+                        fromPlayerId:
+                            sender.playerId
                     }
                 );
 
                 console.log(
-                    `${name} is waiting for a chess opponent.`
+                    sender.playerId,
+                    "requested chess with",
+                    players.get(
+                        targetSocketId
+                    )?.playerId
                 );
 
-                return;
             }
+        );
 
-            /*
-             * Match found.
-             */
+        /* =====================================================
+           ACCEPT REQUEST
+        ===================================================== */
 
-            startChessMatch(
-                opponent,
-                {
-                    socketId: socket.id,
-                    clientId,
-                    name
+        socket.on(
+            "acceptRequest",
+            fromSocketId => {
+
+                if (
+                    !fromSocketId
+                ) {
+                    return;
                 }
-            );
-        }
-    );
 
-    /* =================================================
-       JOIN EXISTING ROOM
-    ================================================= */
+                const sender =
+                    io.sockets.sockets.get(
+                        fromSocketId
+                    );
 
-    socket.on(
-        "room:join",
-        (data = {}, callback) => {
+                if (!sender) {
 
-            const roomId =
-                String(
-                    data.roomId || ""
-                )
-                    .trim()
-                    .toUpperCase();
+                    socket.emit(
+                        "requestError",
+                        "Player is no longer online."
+                    );
 
-            const clientId =
-                String(
-                    data.clientId ||
-                    socket.data.clientId ||
+                    return;
+                }
+
+                if (
+                    socket.data.chessRoom ||
+                    sender.data.chessRoom
+                ) {
+
+                    socket.emit(
+                        "requestError",
+                        "One of the players is already in a game."
+                    );
+
+                    return;
+                }
+
+                /*
+                 * Request acceptor becomes BLACK.
+                 * Request sender becomes WHITE.
+                 */
+
+                const room =
+                    createChessRoom(
+                        sender,
+                        socket
+                    );
+
+                if (!room) {
+
+                    socket.emit(
+                        "requestError",
+                        "Could not create chess room."
+                    );
+
+                    return;
+                }
+
+                console.log(
+                    "Chess room created:",
+                    room.roomId
+                );
+
+                console.log(
+                    "WHITE:",
+                    room.white.playerId
+                );
+
+                console.log(
+                    "BLACK:",
+                    room.black.playerId
+                );
+
+                sendGameReady(
+                    room
+                );
+
+            }
+        );
+
+        /* =====================================================
+           DECLINE REQUEST
+        ===================================================== */
+
+        socket.on(
+            "declineRequest",
+            fromSocketId => {
+
+                const sender =
+                    io.sockets.sockets.get(
+                        fromSocketId
+                    );
+
+                if (sender) {
+
+                    sender.emit(
+                        "requestDeclined",
+                        {
+                            playerId:
+                                players.get(
+                                    socket.id
+                                )?.playerId
+                        }
+                    );
+
+                }
+
+            }
+        );
+
+        /* =====================================================
+           CHESS MOVE
+        ===================================================== */
+
+        socket.on(
+            "chessMove",
+            data => {
+
+                const roomId =
+                    socket.data.chessRoom;
+
+                if (!roomId) {
+
+                    socket.emit(
+                        "moveError",
+                        "You are not in a chess game."
+                    );
+
+                    return;
+                }
+
+                const room =
+                    chessRooms.get(
+                        roomId
+                    );
+
+                if (!room) {
+
+                    socket.emit(
+                        "moveError",
+                        "Chess room not found."
+                    );
+
+                    return;
+                }
+
+                const color =
+                    socket.data.chessColor;
+
+                const turn =
+                    room.game.turn() === "w"
+                        ? "white"
+                        : "black";
+
+                /*
+                 * Turn protection.
+                 */
+
+                if (
+                    color !== turn
+                ) {
+
+                    socket.emit(
+                        "moveError",
+                        "It is not your turn."
+                    );
+
+                    return;
+                }
+
+                if (
+                    !data ||
+                    !data.from ||
+                    !data.to
+                ) {
+
+                    socket.emit(
+                        "moveError",
+                        "Invalid move."
+                    );
+
+                    return;
+                }
+
+                try {
+
+                    const move =
+                        room.game.move({
+                            from:
+                                data.from,
+
+                            to:
+                                data.to,
+
+                            promotion:
+                                data.promotion ||
+                                "q"
+                        });
+
+                    if (!move) {
+
+                        socket.emit(
+                            "moveError",
+                            "Illegal move."
+                        );
+
+                        return;
+                    }
+
+                    const nextTurn =
+                        room.game.turn() === "w"
+                            ? "white"
+                            : "black";
+
+                    io.to(roomId).emit(
+                        "moveMade",
+                        {
+
+                            from:
+                                move.from,
+
+                            to:
+                                move.to,
+
+                            promotion:
+                                move.promotion,
+
+                            fen:
+                                room.game.fen(),
+
+                            turn:
+                                nextTurn,
+
+                            check:
+                                room.game.isCheck(),
+
+                            checkmate:
+                                room.game.isCheckmate(),
+
+                            stalemate:
+                                room.game.isStalemate()
+
+                        }
+                    );
+
+                    /*
+                     * Game finished.
+                     */
+
+                    if (
+                        room.game.isGameOver()
+                    ) {
+
+                        let result =
+                            "draw";
+
+                        if (
+                            room.game.isCheckmate()
+                        ) {
+
+                            result =
+                                room.game.turn() === "w"
+                                    ? "black"
+                                    : "white";
+
+                        }
+
+                        io.to(roomId).emit(
+                            "gameFinished",
+                            {
+                                result
+                            }
+                        );
+
+                    }
+
+                }
+                catch (error) {
+
+                    console.error(
+                        "Chess move error:",
+                        error
+                    );
+
+                    socket.emit(
+                        "moveError",
+                        "Illegal chess move."
+                    );
+
+                }
+
+            }
+        );
+
+        /* =====================================================
+           LEAVE CHESS
+        ===================================================== */
+
+        socket.on(
+            "leaveChess",
+            () => {
+
+                leaveChessGame(
+                    socket
+                );
+
+            }
+        );
+
+        /* =====================================================
+           DISCONNECT
+        ===================================================== */
+
+        socket.on(
+            "disconnect",
+            () => {
+
+                const player =
+                    players.get(
+                        socket.id
+                    );
+
+                console.log(
+                    "Disconnected:",
+                    player?.playerId ||
                     socket.id
                 );
 
-            const name =
-                String(
-                    data.name ||
-                    socket.data.playerName ||
-                    "Player"
+                /*
+                 * Tell opponent if player
+                 * was in a chess game.
+                 */
+
+                leaveChessGame(
+                    socket,
+                    true
                 );
 
-            if (!roomId) {
+                /*
+                 * Remove only this active
+                 * connection.
+                 *
+                 * The browser keeps its ID
+                 * in localStorage, so when
+                 * it reconnects it can request
+                 * the same ID again.
+                 */
 
-                if (typeof callback === "function") {
-                    callback({
-                        success: false,
-                        error: "Room ID is required."
-                    });
-                }
-
-                return;
-            }
-
-            const room =
-                getRoom(roomId);
-
-            if (!room) {
-
-                if (typeof callback === "function") {
-                    callback({
-                        success: false,
-                        error: "Room not found."
-                    });
-                }
-
-                return;
-            }
-
-            /*
-             * Reconnect existing player.
-             */
-
-            const existingPlayer =
-                getPlayerFromRoom(
-                    room,
-                    clientId
+                players.delete(
+                    socket.id
                 );
 
-            if (existingPlayer) {
+                sendPlayers();
 
-                existingPlayer.socketId =
-                    socket.id;
-
-                existingPlayer.connected =
-                    true;
-
-                existingPlayer.name =
-                    name || existingPlayer.name;
-
-                socket.data.roomId =
-                    room.id;
-
-                socket.data.clientId =
-                    clientId;
-
-                socket.join(room.id);
-
-                if (typeof callback === "function") {
-                    callback({
-                        success: true,
-                        roomId: room.id,
-                        players: roomPlayers(room),
-                        player: existingPlayer
-                    });
-                }
-
-                emitRoomUpdate(room);
-
-                console.log(
-                    `${name} reconnected to ${room.id}`
-                );
-
-                return;
             }
-
-            /*
-             * Room already has two players.
-             */
-
-            if (room.players.size >= 2) {
-
-                if (typeof callback === "function") {
-                    callback({
-                        success: false,
-                        error: "Room is full."
-                    });
-                }
-
-                return;
-            }
-
-            /*
-             * Add new player.
-             */
-
-            const color =
-                room.players.size === 0
-                    ? "white"
-                    : "black";
-
-            const player = {
-                clientId,
-                socketId: socket.id,
-                name,
-                color,
-                connected: true
-            };
-
-            room.players.set(
-                clientId,
-                player
-            );
-
-            socket.data.roomId =
-                room.id;
-
-            socket.data.clientId =
-                clientId;
-
-            socket.join(room.id);
-
-            const players =
-                roomPlayers(room);
-
-            if (typeof callback === "function") {
-                callback({
-                    success: true,
-                    roomId: room.id,
-                    players,
-                    player
-                });
-            }
-
-            io.to(room.id).emit(
-                "room:update",
-                {
-                    roomId: room.id,
-                    players
-                }
-            );
-
-            /*
-             * Two players are now connected.
-             */
-
-            if (room.players.size === 2) {
-
-                const gameData = {
-                    roomId: room.id,
-                    players,
-                    game: {
-                        started: true,
-                        turn: "white",
-                        fen: "start"
-                    }
-                };
-
-                io.to(room.id).emit(
-                    "game:start",
-                    gameData
-                );
-
-                console.log(
-                    `Game started in room ${room.id}`
-                );
-            }
-        }
-    );
-
-    /* =================================================
-       CHESS MOVE
-    ================================================= */
-
-    socket.on(
-        "chess:move",
-        (data = {}) => {
-
-            const roomId =
-                socket.data.roomId;
-
-            if (!roomId) return;
-
-            const room =
-                getRoom(roomId);
-
-            if (!room) return;
-
-            socket.to(roomId).emit(
-                "chess:move",
-                {
-                    ...data,
-                    playerId:
-                        socket.data.clientId
-                }
-            );
-        }
-    );
-
-    /* =================================================
-       CHESS STATE
-    ================================================= */
-
-    socket.on(
-        "chess:state",
-        (data = {}) => {
-
-            const roomId =
-                socket.data.roomId;
-
-            if (!roomId) return;
-
-            socket.to(roomId).emit(
-                "chess:state",
-                {
-                    ...data,
-                    playerId:
-                        socket.data.clientId
-                }
-            );
-        }
-    );
-
-    /* =================================================
-       CHESS TURN
-    ================================================= */
-
-    socket.on(
-        "chess:turn",
-        (data = {}) => {
-
-            const roomId =
-                socket.data.roomId;
-
-            if (!roomId) return;
-
-            socket.to(roomId).emit(
-                "chess:turn",
-                {
-                    ...data,
-                    playerId:
-                        socket.data.clientId
-                }
-            );
-        }
-    );
-
-    /* =================================================
-       CHESS CHECK
-    ================================================= */
-
-    socket.on(
-        "chess:check",
-        (data = {}) => {
-
-            const roomId =
-                socket.data.roomId;
-
-            if (!roomId) return;
-
-            io.to(roomId).emit(
-                "chess:check",
-                {
-                    ...data,
-                    playerId:
-                        socket.data.clientId
-                }
-            );
-        }
-    );
-
-    /* =================================================
-       CHESS CHECKMATE
-    ================================================= */
-
-    socket.on(
-        "chess:checkmate",
-        (data = {}) => {
-
-            const roomId =
-                socket.data.roomId;
-
-            if (!roomId) return;
-
-            io.to(roomId).emit(
-                "chess:checkmate",
-                {
-                    ...data,
-                    playerId:
-                        socket.data.clientId
-                }
-            );
-        }
-    );
-
-    /* =================================================
-       CHESS DRAW
-    ================================================= */
-
-    socket.on(
-        "chess:draw",
-        (data = {}) => {
-
-            const roomId =
-                socket.data.roomId;
-
-            if (!roomId) return;
-
-            io.to(roomId).emit(
-                "chess:draw",
-                {
-                    ...data,
-                    playerId:
-                        socket.data.clientId
-                }
-            );
-        }
-    );
-
-    /* =================================================
-       ROOM LEAVE
-    ================================================= */
-
-    socket.on(
-        "room:leave",
-        () => {
-
-            leaveRoom(socket);
-        }
-    );
-
-    /* =================================================
-       PING
-    ================================================= */
-
-    socket.on(
-        "client:ping",
-        () => {
-
-            socket.emit(
-                "server:pong",
-                {
-                    timestamp: Date.now()
-                }
-            );
-        }
-    );
-
-    /* =================================================
-       DISCONNECT
-    ================================================= */
-
-    socket.on(
-        "disconnect",
-        reason => {
-
-            console.log(
-                `Player disconnected: ${socket.id} (${reason})`
-            );
-
-            removeFromQueue(
-                socket.id
-            );
-
-            /*
-             * Don't immediately destroy
-             * the chess room.
-             *
-             * The browser will reconnect
-             * when chess.html loads.
-             */
-
-            const roomId =
-                socket.data.roomId;
-
-            const clientId =
-                socket.data.clientId;
-
-            if (!roomId || !clientId) {
-                return;
-            }
-
-            const room =
-                getRoom(roomId);
-
-            if (!room) return;
-
-            const player =
-                room.players.get(clientId);
-
-            if (!player) return;
-
-            /*
-             * Only mark disconnected.
-             */
-
-            player.connected = false;
-            player.socketId = null;
-
-            io.to(roomId).emit(
-                "room:player-left",
-                {
-                    player: {
-                        id: clientId,
-                        name: player.name,
-                        color: player.color
-                    }
-                }
-            );
-
-            emitRoomUpdate(room);
-        }
-    );
-});
-
-/* =====================================================
-   LEAVE ROOM
-===================================================== */
-
-function leaveRoom(socket) {
+        );
+
+    }
+);
+
+/* =========================================================
+   LEAVE CHESS GAME
+========================================================= */
+
+function leaveChessGame(
+    socket,
+    disconnected = false
+) {
 
     const roomId =
-        socket.data.roomId;
+        socket.data.chessRoom;
 
-    const clientId =
-        socket.data.clientId;
-
-    if (!roomId || !clientId) {
+    if (!roomId) {
         return;
     }
 
     const room =
-        getRoom(roomId);
+        chessRooms.get(
+            roomId
+        );
+
+    /*
+     * Clear this player's room data.
+     */
+
+    socket.data.chessRoom =
+        null;
+
+    socket.data.chessColor =
+        null;
 
     if (!room) {
         return;
     }
 
-    room.players.delete(
-        clientId
-    );
+    const opponentSocketId =
+        room.white.socketId === socket.id
+            ? room.black.socketId
+            : room.white.socketId;
 
-    socket.leave(roomId);
+    const opponent =
+        io.sockets.sockets.get(
+            opponentSocketId
+        );
 
-    io.to(roomId).emit(
-        "room:player-left",
-        {
-            player: {
-                id: clientId
+    if (opponent) {
+
+        opponent.data.chessRoom =
+            null;
+
+        opponent.data.chessColor =
+            null;
+
+        opponent.emit(
+            "opponentLeft",
+            {
+                playerId:
+                    players.get(
+                        socket.id
+                    )?.playerId ||
+                    null
             }
-        }
+        );
+
+        opponent.leave(
+            roomId
+        );
+
+    }
+
+    chessRooms.delete(
+        roomId
     );
 
-    emitRoomUpdate(room);
-
-    socket.data.roomId = null;
+    socket.leave(
+        roomId
+    );
 
     console.log(
-        `${clientId} left room ${roomId}`
+        "Chess room closed:",
+        roomId
     );
 
-    /*
-     * Delete completely empty room.
-     */
-
-    if (room.players.size === 0) {
-
-        rooms.delete(roomId);
-
-        console.log(
-            `Room deleted: ${roomId}`
-        );
-    }
 }
 
-/* =====================================================
-   ERROR HANDLER
-===================================================== */
-
-app.use(
-    (err, req, res, next) => {
-
-        console.error(err);
-
-        res.status(500).json({
-            error:
-                "Internal server error"
-        });
-    }
-);
-
-/* =====================================================
+/* =========================================================
    START
-===================================================== */
+========================================================= */
 
 server.listen(
     PORT,
-    "0.0.0.0",
     () => {
 
         console.log(
-            `DuoPlayServer running on port ${PORT}`
+            `DuoPlay server running on port ${PORT}`
         );
 
-        console.log(
-            `Serving DuoPlay from ${ROOT_DIR}`
-        );
     }
 );
