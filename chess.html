@@ -10,7 +10,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chess.js@1.4.0/dist/chess.min.js"></script>
 
 <style>
-
 * {
     box-sizing: border-box;
 }
@@ -20,15 +19,14 @@ body {
     margin: 0;
     min-height: 100%;
     font-family: Arial, sans-serif;
-    color: #fff;
+    color: white;
 }
 
 body {
-
     background:
         linear-gradient(
-            rgba(22,70,58,.58),
-            rgba(12,52,40,.72)
+            rgba(22,70,58,.62),
+            rgba(8,35,27,.82)
         ),
         linear-gradient(
             135deg,
@@ -40,51 +38,58 @@ body {
     overflow-x: hidden;
 }
 
-
-/* =====================================================
-   BACKGROUND
-===================================================== */
+/* BACKGROUND */
 
 .background {
     position: fixed;
     inset: 0;
-    overflow: hidden;
     z-index: -1;
+    overflow: hidden;
 }
 
 .sun {
     position: absolute;
     width: 150px;
     height: 150px;
+    right: 8%;
+    top: 5%;
+
     border-radius: 50%;
+
     background: #fff0a8;
-    right: 9%;
-    top: 6%;
-    box-shadow: 0 0 45px #fff0a8;
+
+    box-shadow:
+        0 0 50px #fff0a8;
 }
 
 .mountain {
     position: absolute;
-    bottom: 15%;
+    bottom: 13%;
+
     width: 0;
     height: 0;
+
     border-left: 180px solid transparent;
     border-right: 180px solid transparent;
-    border-bottom: 330px solid rgba(235,250,246,.55);
+    border-bottom: 330px solid rgba(235,250,246,.45);
 }
 
 .mountain.one {
-    left: -100px;
+    left: -120px;
 }
 
 .mountain.two {
     left: 18%;
-    border-bottom-color: rgba(205,235,230,.5);
+
+    border-bottom-color:
+        rgba(205,235,230,.42);
 }
 
 .mountain.three {
     right: 17%;
-    border-bottom-color: rgba(230,247,243,.55);
+
+    border-bottom-color:
+        rgba(230,247,243,.45);
 }
 
 .mountain.four {
@@ -94,24 +99,21 @@ body {
 .grass {
     position: absolute;
     bottom: 0;
+
     width: 100%;
     height: 24%;
+
     background:
         linear-gradient(
             to top,
-            rgba(20,65,45,.95),
-            rgba(40,105,70,.75)
+            rgba(20,65,45,.98),
+            rgba(40,105,70,.72)
         );
 }
 
-
-/* =====================================================
-   TOP BAR
-===================================================== */
+/* TOP BAR */
 
 .topbar {
-
-    width: 100%;
     min-height: 70px;
 
     padding:
@@ -125,7 +127,6 @@ body {
 }
 
 .logo {
-
     font-family: Georgia, serif;
 
     font-size: 34px;
@@ -134,18 +135,17 @@ body {
     color: #ffe19a;
 
     text-shadow:
-        0 2px 5px rgba(0,0,0,.3);
+        0 2px 5px rgba(0,0,0,.35);
 }
 
 .top-right {
-
     display: flex;
     align-items: center;
+
     gap: 10px;
 }
 
 .player-id {
-
     padding: 10px 15px;
 
     border-radius: 25px;
@@ -157,12 +157,10 @@ body {
         1px solid rgba(255,255,255,.16);
 
     font-family: monospace;
-
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .back {
-
     border: none;
 
     padding: 11px 18px;
@@ -170,29 +168,27 @@ body {
     border-radius: 25px;
 
     background:
-        rgba(20,55,46,.58);
+        rgba(20,55,46,.7);
 
     color: white;
 
     cursor: pointer;
 
-    font-size: 15px;
+    font-size: 14px;
 }
 
 .back:hover {
-    background: rgba(20,55,46,.8);
+    background:
+        rgba(20,55,46,.9);
 }
 
-
-/* =====================================================
-   MAIN
-===================================================== */
+/* MAIN */
 
 .container {
-
     width: min(1250px, 96%);
 
-    margin: 12px auto 50px;
+    margin:
+        12px auto 50px;
 
     display: grid;
 
@@ -205,15 +201,11 @@ body {
     align-items: start;
 }
 
-
-/* =====================================================
-   GAME AREA
-===================================================== */
+/* GAME CARD */
 
 .game-card {
-
     background:
-        rgba(7,45,35,.76);
+        rgba(7,45,35,.78);
 
     border:
         1px solid rgba(255,255,255,.14);
@@ -225,13 +217,14 @@ body {
     box-shadow:
         0 25px 70px rgba(0,0,0,.28);
 
-    backdrop-filter: blur(12px);
+    backdrop-filter:
+        blur(12px);
 }
 
+/* PLAYER */
+
 .player-bar {
-
     display: flex;
-
     align-items: center;
 
     gap: 15px;
@@ -240,9 +233,10 @@ body {
 }
 
 .player-icon {
-
     width: 58px;
     height: 58px;
+
+    flex-shrink: 0;
 
     border-radius: 50%;
 
@@ -266,14 +260,12 @@ body {
 }
 
 .player-info strong {
-
     display: block;
 
     font-size: 20px;
 }
 
 .player-info span {
-
     display: block;
 
     margin-top: 4px;
@@ -284,7 +276,6 @@ body {
 }
 
 .status-dot {
-
     display: inline-block;
 
     width: 9px;
@@ -300,16 +291,12 @@ body {
         0 0 9px #63f29d;
 }
 
-
-/* =====================================================
-   BOARD
-===================================================== */
+/* BOARD */
 
 .board-wrap {
-
     width: min(720px, 100%);
 
-    margin: 0 auto;
+    margin: auto;
 
     padding: 12px;
 
@@ -327,7 +314,6 @@ body {
 }
 
 .board {
-
     width: 100%;
 
     aspect-ratio: 1 / 1;
@@ -346,11 +332,9 @@ body {
 }
 
 .square {
-
     position: relative;
 
     display: flex;
-
     align-items: center;
     justify-content: center;
 
@@ -376,20 +360,17 @@ body {
 }
 
 .square.selected {
-
     box-shadow:
         inset 0 0 0 5px #f7cf68;
 }
 
 .square.last {
-
     box-shadow:
         inset 0 0 0 4px
         rgba(255,224,117,.75);
 }
 
 .square.move-target::after {
-
     content: "";
 
     position: absolute;
@@ -404,7 +385,6 @@ body {
 }
 
 .square.capture-target::after {
-
     content: "";
 
     position: absolute;
@@ -417,13 +397,9 @@ body {
         5px solid rgba(255,226,112,.7);
 }
 
-
-/* =====================================================
-   PIECES
-===================================================== */
+/* PIECES */
 
 .piece {
-
     position: relative;
 
     z-index: 2;
@@ -437,17 +413,15 @@ body {
 
     line-height: 1;
 
-    transition:
-        transform .12s ease;
-
     filter:
-        drop-shadow(0 4px 3px rgba(0,0,0,.55));
+        drop-shadow(
+            0 4px 3px rgba(0,0,0,.55)
+        );
 
     cursor: pointer;
 }
 
 .piece.white {
-
     color: #fffaf0;
 
     -webkit-text-stroke:
@@ -458,7 +432,6 @@ body {
 }
 
 .piece.black {
-
     color: #16120d;
 
     -webkit-text-stroke:
@@ -468,20 +441,9 @@ body {
         0 3px 3px rgba(255,255,255,.12);
 }
 
-.square:hover .piece {
-
-    transform:
-        translateY(-2px)
-        scale(1.04);
-}
-
-
-/* =====================================================
-   SIDE PANEL
-===================================================== */
+/* SIDE PANEL */
 
 .side-panel {
-
     display: flex;
 
     flex-direction: column;
@@ -490,7 +452,6 @@ body {
 }
 
 .panel {
-
     background:
         rgba(8,48,38,.72);
 
@@ -501,11 +462,11 @@ body {
 
     padding: 18px;
 
-    backdrop-filter: blur(10px);
+    backdrop-filter:
+        blur(10px);
 }
 
 .panel-title {
-
     color: #eac873;
 
     font-family: monospace;
@@ -520,14 +481,12 @@ body {
 }
 
 .value {
-
-    color: #fff;
+    color: white;
 
     font-size: 17px;
 }
 
 .captured {
-
     min-height: 32px;
 
     display: flex;
@@ -538,12 +497,10 @@ body {
 }
 
 .captured span {
-
     font-size: 25px;
 }
 
 .history {
-
     max-height: 180px;
 
     overflow-y: auto;
@@ -554,7 +511,6 @@ body {
 }
 
 .history-row {
-
     display: flex;
 
     gap: 10px;
@@ -565,33 +521,26 @@ body {
 }
 
 .history-number {
-
     width: 25px;
 
     color: #d5b86d;
 }
 
 .game-status {
-
     color: #ffe9a9;
 
     line-height: 1.5;
 }
 
-
-/* =====================================================
-   BUTTONS
-===================================================== */
+/* BUTTONS */
 
 .actions {
-
     display: flex;
 
     gap: 10px;
 }
 
 .action {
-
     flex: 1;
 
     padding: 12px;
@@ -608,17 +557,15 @@ body {
 
     cursor: pointer;
 
-    font-size: 15px;
+    font-size: 14px;
 }
 
 .action:hover {
-
     background:
         rgba(255,255,255,.12);
 }
 
 .action.gold {
-
     background:
         linear-gradient(
             135deg,
@@ -633,35 +580,34 @@ body {
     font-weight: bold;
 }
 
-
-/* =====================================================
-   WAITING OVERLAY
-===================================================== */
+/* WAITING */
 
 .waiting {
-
     position: fixed;
 
     inset: 0;
 
     z-index: 20;
 
-    display: flex;
+    display: none;
 
     align-items: center;
-
     justify-content: center;
 
     padding: 20px;
 
     background:
-        rgba(5,30,23,.58);
+        rgba(5,30,23,.62);
 
-    backdrop-filter: blur(8px);
+    backdrop-filter:
+        blur(8px);
+}
+
+.waiting.show {
+    display: flex;
 }
 
 .waiting-card {
-
     width: min(400px, 100%);
 
     padding: 35px 25px;
@@ -685,11 +631,11 @@ body {
 }
 
 .loader {
-
     width: 48px;
     height: 48px;
 
-    margin: 0 auto 20px;
+    margin:
+        0 auto 20px;
 
     border-radius: 50%;
 
@@ -704,21 +650,19 @@ body {
 }
 
 @keyframes spin {
-
     to {
         transform: rotate(360deg);
     }
 }
 
 .waiting-card h2 {
-
-    margin: 0 0 8px;
+    margin:
+        0 0 8px;
 
     color: #ffe3a0;
 }
 
 .waiting-card p {
-
     margin: 0;
 
     color: #d2e4dc;
@@ -726,13 +670,9 @@ body {
     line-height: 1.5;
 }
 
-
-/* =====================================================
-   PROMOTION
-===================================================== */
+/* PROMOTION */
 
 .promotion {
-
     position: fixed;
 
     inset: 0;
@@ -742,22 +682,20 @@ body {
     display: none;
 
     align-items: center;
-
     justify-content: center;
 
     background:
         rgba(0,0,0,.6);
 
-    backdrop-filter: blur(6px);
+    backdrop-filter:
+        blur(6px);
 }
 
 .promotion.show {
-
     display: flex;
 }
 
 .promotion-box {
-
     background: #123d31;
 
     padding: 25px;
@@ -771,7 +709,6 @@ body {
 }
 
 .promotion-buttons {
-
     display: flex;
 
     gap: 10px;
@@ -780,7 +717,6 @@ body {
 }
 
 .promotion-buttons button {
-
     width: 60px;
     height: 60px;
 
@@ -798,100 +734,78 @@ body {
     cursor: pointer;
 }
 
+/* RESPONSIVE */
 
-/* =====================================================
-   RESPONSIVE
-===================================================== */
-
-@media (max-width: 900px) {
+@media(max-width:900px) {
 
     .container {
-
         grid-template-columns: 1fr;
-
     }
 
     .side-panel {
-
         display: grid;
 
         grid-template-columns:
             repeat(2, 1fr);
-
-    }
-
-    .panel:last-child {
-
-        grid-column:
-            1 / -1;
     }
 }
 
-@media (max-width: 600px) {
+@media(max-width:600px) {
 
     .topbar {
-
         padding: 10px 12px;
     }
 
     .logo {
-
         font-size: 25px;
     }
 
     .player-id {
+        font-size: 9px;
 
-        font-size: 10px;
-
-        padding: 8px 10px;
+        padding:
+            8px 10px;
     }
 
     .back {
+        font-size: 11px;
 
-        font-size: 12px;
-
-        padding: 9px 12px;
+        padding:
+            9px 11px;
     }
 
     .container {
-
         width: 100%;
 
         margin-top: 0;
     }
 
     .game-card {
-
-        padding: 10px;
+        padding: 9px;
 
         border-radius: 18px;
     }
 
     .board-wrap {
-
         padding: 7px;
 
         border-radius: 13px;
     }
 
     .piece {
-
         font-size:
             clamp(30px, 11vw, 55px);
     }
 
     .side-panel {
-
         display: flex;
     }
 
     .panel {
-
         border-radius: 14px;
     }
 
     .actions {
-
         position: sticky;
 
         bottom: 8px;
@@ -899,13 +813,10 @@ body {
         z-index: 5;
     }
 }
-
 </style>
 </head>
 
-
 <body>
-
 
 <div class="background">
 
@@ -920,10 +831,6 @@ body {
 
 </div>
 
-
-<!-- =====================================================
-     TOP BAR
-===================================================== -->
 
 <header class="topbar">
 
@@ -952,15 +859,9 @@ body {
 </header>
 
 
-<!-- =====================================================
-     MAIN
-===================================================== -->
-
 <main class="container">
 
-
 <section class="game-card">
-
 
     <div class="player-bar">
 
@@ -975,21 +876,17 @@ body {
             </strong>
 
             <span>
-
                 <span class="status-dot"></span>
 
                 <span id="connectionText">
                     Connecting...
                 </span>
-
             </span>
 
         </div>
 
     </div>
 
-
-    <!-- BOARD -->
 
     <div class="board-wrap">
 
@@ -1000,41 +897,20 @@ body {
 
     </div>
 
+</section>
 
-    <div
-        style="
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        margin-top:16px;
-        gap:10px;
-        "
-    >
 
-        <div>
+<aside class="side-panel">
 
-            <strong id="youText">
-                You
-            </strong>
+    <div class="panel">
 
-            <div
-                id="colorText"
-                style="
-                color:#bcebd4;
-                margin-top:4px;
-                "
-            >
-                Waiting for game
-            </div>
-
+        <div class="panel-title">
+            YOUR COLOR
         </div>
 
         <div
-            id="turnText"
-            style="
-            color:#ffe2a0;
-            font-family:monospace;
-            "
+            class="value"
+            id="colorText"
         >
             Waiting...
         </div>
@@ -1042,53 +918,58 @@ body {
     </div>
 
 
-    <div
-        id="mainStatus"
-        style="
-        margin-top:15px;
-        padding:13px 16px;
-        border:1px solid rgba(255,255,255,.13);
-        border-radius:15px;
-        color:#dcebe5;
-        "
-    >
-        Waiting for opponent
-    </div>
+    <div class="panel">
 
+        <div class="panel-title">
+            TURN
+        </div>
 
-    <div class="actions">
-
-        <button
-            class="action"
-            id="flipButton"
+        <div
+            class="value"
+            id="turnText"
         >
-            ⇅ Flip
-        </button>
-
-        <button
-            class="action"
-            id="newButton"
-        >
-            ♺ New
-        </button>
+            Waiting...
+        </div>
 
     </div>
-
-
-</section>
-
-
-<!-- =====================================================
-     SIDE PANEL
-===================================================== -->
-
-<aside class="side-panel">
 
 
     <div class="panel">
 
         <div class="panel-title">
-            Captured by White
+            STATUS
+        </div>
+
+        <div
+            class="game-status"
+            id="gameStatus"
+        >
+            Connecting to DuoPlay...
+        </div>
+
+    </div>
+
+
+    <div class="panel">
+
+        <div class="panel-title">
+            LAST ACTION
+        </div>
+
+        <div
+            class="game-status"
+            id="mainStatus"
+        >
+            Connecting...
+        </div>
+
+    </div>
+
+
+    <div class="panel">
+
+        <div class="panel-title">
+            CAPTURED BY WHITE
         </div>
 
         <div
@@ -1102,7 +983,7 @@ body {
     <div class="panel">
 
         <div class="panel-title">
-            Captured by Black
+            CAPTURED BY BLACK
         </div>
 
         <div
@@ -1116,7 +997,7 @@ body {
     <div class="panel">
 
         <div class="panel-title">
-            Move History
+            MOVE HISTORY
         </div>
 
         <div
@@ -1129,29 +1010,32 @@ body {
 
     <div class="panel">
 
-        <div class="panel-title">
-            Game Status
-        </div>
+        <div class="actions">
 
-        <div
-            class="game-status"
-            id="gameStatus"
-        >
-            Waiting for a player...
+            <button
+                class="action"
+                id="flipButton"
+            >
+                Flip
+            </button>
+
+            <button
+                class="action gold"
+                id="newButton"
+            >
+                Sync
+            </button>
+
         </div>
 
     </div>
 
-
 </aside>
-
 
 </main>
 
 
-<!-- =====================================================
-     WAITING
-===================================================== -->
+<!-- WAITING -->
 
 <div
     class="waiting"
@@ -1167,7 +1051,7 @@ body {
         </h2>
 
         <p id="waitingMessage">
-            Connecting to DuoPlay...
+            Connecting to DuoPlay server...
         </p>
 
     </div>
@@ -1175,9 +1059,7 @@ body {
 </div>
 
 
-<!-- =====================================================
-     PROMOTION
-===================================================== -->
+<!-- PROMOTION -->
 
 <div
     class="promotion"
@@ -1232,25 +1114,21 @@ const SERVER =
 const PIECES = {
 
     w: {
-
         p: "♙",
         n: "♘",
         b: "♗",
         r: "♖",
         q: "♕",
         k: "♔"
-
     },
 
     b: {
-
         p: "♟",
         n: "♞",
         b: "♝",
         r: "♜",
         q: "♛",
         k: "♚"
-
     }
 
 };
@@ -1263,17 +1141,19 @@ const PIECES = {
 let socket = null;
 
 let myId =
-    localStorage.getItem("duoplayPlayerId") || null;
+    localStorage.getItem(
+        "duoplayPlayerId"
+    );
 
-let roomId = null;
+let roomId =
+    localStorage.getItem(
+        "duoplayRoomId"
+    );
 
 let myColor = null;
 
-let whitePlayer = null;
-
-let blackPlayer = null;
-
-let game = new Chess();
+let game =
+    new Chess();
 
 let selectedSquare = null;
 
@@ -1285,7 +1165,7 @@ let flipped = false;
 
 let waitingPromotion = null;
 
-let opponentConnected = false;
+let moveHistory = [];
 
 
 /* =====================================================
@@ -1336,20 +1216,38 @@ const waitingMessage =
 
 
 /* =====================================================
+   WAITING
+===================================================== */
+
+function showWaiting(title, message) {
+
+    waitingTitle.textContent =
+        title;
+
+    waitingMessage.textContent =
+        message;
+
+    waiting.classList.add("show");
+}
+
+
+function hideWaiting() {
+
+    waiting.classList.remove("show");
+
+}
+
+
+/* =====================================================
    CONNECT
 ===================================================== */
 
 function connectToServer() {
 
-    const auth = {};
-
-    if (myId) {
-
-        auth.playerId =
-            myId;
-
-    }
-
+    showWaiting(
+        "Connecting",
+        "Connecting to DuoPlay multiplayer server..."
+    );
 
     socket =
         io(SERVER, {
@@ -1357,9 +1255,7 @@ function connectToServer() {
             transports: [
                 "websocket",
                 "polling"
-            ],
-
-            auth: auth
+            ]
 
         });
 
@@ -1373,6 +1269,19 @@ function connectToServer() {
 
             connectionText.style.color =
                 "#aef5c8";
+
+            myId =
+                socket.id;
+
+            localStorage.setItem(
+                "duoplayPlayerId",
+                myId
+            );
+
+            myIdElement.textContent =
+                myId;
+
+            joinExistingRoom();
 
         }
     );
@@ -1392,104 +1301,88 @@ function connectToServer() {
     );
 
 
+    socket.on(
+        "connect_error",
+        error => {
+
+            console.error(
+                "Socket connection error:",
+                error
+            );
+
+            connectionText.textContent =
+                "Connection failed";
+
+            showWaiting(
+                "Connection failed",
+                "Could not connect to DuoPlay server."
+            );
+
+        }
+    );
+
+
     /* =================================================
-       OUR ID
+       ROOM UPDATE
     ================================================= */
 
     socket.on(
-        "yourId",
-        id => {
+        "room:update",
+        data => {
 
-            myId = id;
+            if (!data) {
+                return;
+            }
+
+            roomId =
+                data.roomId || roomId;
+
+            const players =
+                data.players || [];
+
+            updatePlayers(
+                players
+            );
+
+        }
+    );
+
+
+    /* =================================================
+       GAME START
+    ================================================= */
+
+    socket.on(
+        "game:start",
+        data => {
+
+            console.log(
+                "GAME START:",
+                data
+            );
+
+            roomId =
+                data.roomId;
 
             localStorage.setItem(
-                "duoplayPlayerId",
-                id
+                "duoplayRoomId",
+                roomId
             );
 
-            myIdElement.textContent =
-                id;
+            const players =
+                data.players || [];
 
-            requestGameState();
-
-        }
-    );
-
-
-    /* =================================================
-       GAME READY
-    ================================================= */
-
-    socket.on(
-        "gameReady",
-        data => {
-
-            setupGame(
-                data
+            determineColor(
+                players
             );
 
-        }
-    );
-
-
-    /* =================================================
-       GAME RECONNECTED
-    ================================================= */
-
-    socket.on(
-        "gameReconnected",
-        data => {
-
-            setupGame(
-                data
-            );
-
-        }
-    );
-
-
-    /* =================================================
-       GAME STATE
-    ================================================= */
-
-    socket.on(
-        "gameState",
-        data => {
-
-            setupGame(
-                data
-            );
-
-        }
-    );
-
-
-    /* =================================================
-       MOVE MADE
-    ================================================= */
-
-    socket.on(
-        "moveMade",
-        data => {
-
-            applyServerMove(
-                data
-            );
-
-        }
-    );
-
-
-    /* =================================================
-       MOVE ERROR
-    ================================================= */
-
-    socket.on(
-        "moveError",
-        message => {
+            hideWaiting();
 
             mainStatus.textContent =
-                message;
+                "Game started.";
+
+            gameStatus.textContent =
+                "Chess game started.";
 
             renderBoard();
 
@@ -1498,33 +1391,63 @@ function connectToServer() {
 
 
     /* =================================================
-       GAME FINISHED
+       CHESS MOVE
     ================================================= */
 
     socket.on(
-        "gameFinished",
+        "chess:move",
         data => {
 
-            if (
-                data.result === "white"
-            ) {
+            console.log(
+                "Opponent move:",
+                data
+            );
 
-                gameStatus.textContent =
-                    "White wins!";
-
+            if (!data.from || !data.to) {
+                return;
             }
-            else if (
-                data.result === "black"
-            ) {
 
-                gameStatus.textContent =
-                    "Black wins!";
+            applyOpponentMove(
+                data
+            );
 
+        }
+    );
+
+
+    /* =================================================
+       CHESS STATE
+    ================================================= */
+
+    socket.on(
+        "chess:state",
+        data => {
+
+            if (!data) {
+                return;
             }
-            else {
 
-                gameStatus.textContent =
-                    "Draw!";
+            if (data.fen) {
+
+                try {
+
+                    game.load(
+                        data.fen
+                    );
+
+                    renderBoard();
+
+                    updateUI();
+
+                }
+                catch(error) {
+
+                    console.error(
+                        "Invalid FEN:",
+                        error
+                    );
+
+                }
 
             }
 
@@ -1533,41 +1456,21 @@ function connectToServer() {
 
 
     /* =================================================
-       OPPONENT DISCONNECTED
+       PLAYER LEFT
     ================================================= */
 
     socket.on(
-        "opponentDisconnected",
+        "room:player-left",
         () => {
-
-            opponentConnected =
-                false;
 
             opponentName.textContent =
                 "Opponent disconnected";
 
             mainStatus.textContent =
-                "Waiting for opponent to reconnect...";
+                "Opponent left the game.";
 
             gameStatus.textContent =
-                "Opponent disconnected.";
-
-        }
-    );
-
-
-    socket.on(
-        "connect_error",
-        error => {
-
-            connectionText.textContent =
-                "Server connection failed";
-
-            waitingTitle.textContent =
-                "Connection problem";
-
-            waitingMessage.textContent =
-                "Make sure the DuoPlay server is running.";
+                "Waiting for opponent.";
 
         }
     );
@@ -1576,366 +1479,222 @@ function connectToServer() {
 
 
 /* =====================================================
-   REQUEST CURRENT GAME
+   JOIN EXISTING ROOM
 ===================================================== */
 
-function requestGameState() {
+function joinExistingRoom() {
 
-    if (
-        socket &&
-        socket.connected
-    ) {
+    if (!roomId) {
 
-        socket.emit(
-            "getGameState"
+        hideWaiting();
+
+        mainStatus.textContent =
+            "No game room found.";
+
+        gameStatus.textContent =
+            "Open a chess room from Game Room.";
+
+        return;
+
+    }
+
+
+    socket.emit(
+        "room:join",
+        {
+            roomId: roomId,
+            name:
+                localStorage.getItem(
+                    "duoplayPlayerName"
+                ) ||
+                "Player"
+        },
+        response => {
+
+            console.log(
+                "JOIN RESPONSE:",
+                response
+            );
+
+            if (!response || !response.success) {
+
+                hideWaiting();
+
+                mainStatus.textContent =
+                    response &&
+                    response.error
+                        ? response.error
+                        : "Could not join room.";
+
+                return;
+
+            }
+
+
+            roomId =
+                response.roomId;
+
+            localStorage.setItem(
+                "duoplayRoomId",
+                roomId
+            );
+
+
+            updatePlayers(
+                response.players || []
+            );
+
+
+            determineColor(
+                response.players || []
+            );
+
+
+            if (
+                response.players &&
+                response.players.length === 2
+            ) {
+
+                hideWaiting();
+
+                mainStatus.textContent =
+                    "Game ready.";
+
+                gameStatus.textContent =
+                    "Your opponent is connected.";
+
+            }
+            else {
+
+                hideWaiting();
+
+                mainStatus.textContent =
+                    "Waiting for opponent.";
+
+                gameStatus.textContent =
+                    "Share the room with another player.";
+
+            }
+
+            renderBoard();
+
+            updateUI();
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   PLAYERS
+===================================================== */
+
+function updatePlayers(players) {
+
+    if (!players) {
+        return;
+    }
+
+
+    if (players.length === 0) {
+
+        opponentName.textContent =
+            "Waiting for opponent";
+
+        return;
+
+    }
+
+
+    const me =
+        players.find(
+            player =>
+                player.id === myId
         );
 
-    }
 
-}
-
-
-/* =====================================================
-   SETUP GAME
-===================================================== */
-
-function setupGame(data) {
-
-    roomId =
-        data.roomId || roomId;
-
-    whitePlayer =
-        typeof data.white === "object"
-            ? data.white.id
-            : data.white;
-
-    blackPlayer =
-        typeof data.black === "object"
-            ? data.black.id
-            : data.black;
+    const opponent =
+        players.find(
+            player =>
+                player.id !== myId
+        );
 
 
-    /* ================================================
-       DETERMINE OUR COLOUR
-    ================================================= */
-
-    if (
-        whitePlayer === myId
-    ) {
-
-        myColor = "white";
-
-    }
-    else if (
-        blackPlayer === myId
-    ) {
-
-        myColor = "black";
-
-    }
-    else if (
-        data.color
-    ) {
+    if (me) {
 
         myColor =
-            data.color;
-
-    }
-
-
-    /* ================================================
-       BOARD ORIENTATION
-    ================================================= */
-
-    flipped =
-        myColor === "black";
-
-
-    /* ================================================
-       LOAD FEN
-    ================================================= */
-
-    try {
-
-        if (data.fen) {
-
-            game.load(
-                data.fen
-            );
-
-        }
-        else {
-
-            game.reset();
-
-        }
-
-    }
-    catch (error) {
-
-        game.reset();
-
-    }
-
-
-    selectedSquare =
-        null;
-
-    legalMoves =
-        [];
-
-    lastMove =
-        null;
-
-
-    opponentConnected =
-        true;
-
-
-    /* ================================================
-       UI
-    ================================================= */
-
-    myIdElement.textContent =
-        myId || "Unknown";
-
-
-    if (
-        myColor === "white"
-    ) {
+            me.color;
 
         colorText.textContent =
-            "You are White";
+            myColor === "white"
+                ? "You are White"
+                : "You are Black";
+
+        flipped =
+            myColor === "black";
+
+    }
+
+
+    if (opponent) {
 
         opponentName.textContent =
-            "Black · " +
-            (blackPlayer || "Opponent");
+            opponent.name ||
+            "Opponent";
 
     }
-    else if (
-        myColor === "black"
-    ) {
-
-        colorText.textContent =
-            "You are Black";
-
-        opponentName.textContent =
-            "White · " +
-            (whitePlayer || "Opponent");
-
-    }
-    else {
-
-        colorText.textContent =
-            "Spectator";
-
-    }
-
-
-    waiting.style.display =
-        "none";
-
-
-    updateUI();
-
-    renderBoard();
-
-    renderHistory();
-
-    renderCaptured();
 
 }
 
 
 /* =====================================================
-   APPLY SERVER MOVE
+   DETERMINE COLOR
 ===================================================== */
 
-function applyServerMove(data) {
+function determineColor(players) {
 
-    if (!data) {
-        return;
-    }
-
-
-    try {
-
-        /*
-         * Load the FEN sent by the server.
-         *
-         * This guarantees both devices
-         * have exactly the same board.
-         */
-
-        if (data.fen) {
-
-            game.load(
-                data.fen
-            );
-
-        }
-        else if (
-            data.move
-        ) {
-
-            game.move(
-                data.move
-            );
-
-        }
-
-    }
-    catch (error) {
-
-        console.error(
-            "Could not apply move:",
-            error
+    const me =
+        players.find(
+            player =>
+                player.id === myId
         );
 
-        return;
-
-    }
-
-
-    lastMove =
-        data.move || null;
-
-
-    selectedSquare =
-        null;
-
-    legalMoves =
-        [];
-
-
-    updateUI();
-
-    renderBoard();
-
-    renderHistory();
-
-    renderCaptured();
-
-
-    if (
-        data.checkmate
-    ) {
-
-        gameStatus.textContent =
-            "Checkmate!";
-
-    }
-    else if (
-        data.stalemate
-    ) {
-
-        gameStatus.textContent =
-            "Stalemate — draw.";
-
-    }
-    else if (
-        data.check
-    ) {
-
-        gameStatus.textContent =
-            (
-                game.turn() === "w"
-                    ? "White"
-                    : "Black"
-            ) +
-            " is in check.";
-
-    }
-
-}
-
-
-/* =====================================================
-   BOARD SQUARE LIST
-===================================================== */
-
-function getSquares() {
-
-    const files =
-        [
-            "a",
-            "b",
-            "c",
-            "d",
-            "e",
-            "f",
-            "g",
-            "h"
-        ];
-
-    const ranks =
-        [
-            "8",
-            "7",
-            "6",
-            "5",
-            "4",
-            "3",
-            "2",
-            "1"
-        ];
-
-
-    if (
-        flipped
-    ) {
-
-        files.reverse();
-
-        ranks.reverse();
-
-    }
-
-
-    const result = [];
-
-
-    for (
-        const rank of ranks
-    ) {
-
-        for (
-            const file of files
-        ) {
-
-            result.push(
-                file + rank
-            );
-
-        }
-
-    }
-
-
-    return result;
-
-}
-
-
-/* =====================================================
-   IS LIGHT
-===================================================== */
-
-function isLight(square) {
-
-    const file =
-        square.charCodeAt(0) -
-        97;
-
-    const rank =
-        Number(
-            square[1]
+    const opponent =
+        players.find(
+            player =>
+                player.id !== myId
         );
 
 
-    return (
-        (file + rank) % 2 === 0
-    );
+    if (me) {
+
+        myColor =
+            me.color;
+
+    }
+
+
+    if (myColor) {
+
+        colorText.textContent =
+            myColor === "white"
+                ? "You are White"
+                : "You are Black";
+
+        flipped =
+            myColor === "black";
+
+    }
+
+
+    if (opponent) {
+
+        opponentName.textContent =
+            opponent.name ||
+            "Opponent";
+
+    }
 
 }
 
@@ -1949,12 +1708,62 @@ function renderBoard() {
     board.innerHTML = "";
 
 
-    const squares =
-        getSquares();
+    let files =
+        [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e",
+            "f",
+            "g",
+            "h"
+        ];
 
 
-    squares.forEach(
-        square => {
+    let ranks =
+        [
+            "8",
+            "7",
+            "6",
+            "5",
+            "4",
+            "3",
+            "2",
+            "1"
+        ];
+
+
+    if (flipped) {
+
+        files.reverse();
+
+        ranks.reverse();
+
+    }
+
+
+    for (
+        let row = 0;
+        row < 8;
+        row++
+    ) {
+
+        for (
+            let col = 0;
+            col < 8;
+            col++
+        ) {
+
+            const file =
+                files[col];
+
+            const rank =
+                ranks[row];
+
+            const square =
+                file + rank;
+
 
             const element =
                 document.createElement(
@@ -1965,14 +1774,14 @@ function renderBoard() {
             element.className =
                 "square " +
                 (
-                    isLight(square)
+                    (row + col) % 2 === 0
                         ? "light"
                         : "dark"
                 );
 
 
             if (
-                square === selectedSquare
+                selectedSquare === square
             ) {
 
                 element.classList.add(
@@ -1985,8 +1794,8 @@ function renderBoard() {
             if (
                 lastMove &&
                 (
-                    square === lastMove.from ||
-                    square === lastMove.to
+                    lastMove.from === square ||
+                    lastMove.to === square
                 )
             ) {
 
@@ -2028,9 +1837,7 @@ function renderBoard() {
 
 
             const piece =
-                game.get(
-                    square
-                );
+                game.get(square);
 
 
             if (piece) {
@@ -2040,7 +1847,6 @@ function renderBoard() {
                         "span"
                     );
 
-
                 pieceElement.className =
                     "piece " +
                     (
@@ -2049,14 +1855,12 @@ function renderBoard() {
                             : "black"
                     );
 
-
                 pieceElement.textContent =
                     PIECES[
                         piece.color
                     ][
                         piece.type
                     ];
-
 
                 element.appendChild(
                     pieceElement
@@ -2082,38 +1886,46 @@ function renderBoard() {
             );
 
         }
-    );
+
+    }
+
+
+    updateUI();
+
+    updateCaptured();
+
+    updateHistory();
 
 }
 
 
 /* =====================================================
-   SQUARE CLICK
+   CLICK SQUARE
 ===================================================== */
 
 function squareClicked(square) {
 
-    if (
-        !roomId
-    ) {
+    if (!roomId) {
+
+        mainStatus.textContent =
+            "No game room.";
 
         return;
 
     }
 
 
-    if (
-        !myColor
-    ) {
+    if (!myColor) {
+
+        mainStatus.textContent =
+            "Your color is not ready.";
 
         return;
 
     }
 
 
-    if (
-        game.isGameOver()
-    ) {
+    if (game.isGameOver()) {
 
         return;
 
@@ -2136,9 +1948,7 @@ function squareClicked(square) {
         );
 
 
-    if (
-        !myTurn
-    ) {
+    if (!myTurn) {
 
         mainStatus.textContent =
             "Wait for your turn.";
@@ -2148,13 +1958,7 @@ function squareClicked(square) {
     }
 
 
-    /* ================================================
-       DESTINATION
-    ================================================= */
-
-    if (
-        selectedSquare
-    ) {
+    if (selectedSquare) {
 
         const target =
             legalMoves.find(
@@ -2179,7 +1983,6 @@ function squareClicked(square) {
 
                 };
 
-
                 showPromotion();
 
             }
@@ -2192,20 +1995,13 @@ function squareClicked(square) {
 
             }
 
-
             return;
 
         }
 
 
-        /* ============================================
-           SELECT ANOTHER OWN PIECE
-        ============================================ */
-
         const piece =
-            game.get(
-                square
-            );
+            game.get(square);
 
 
         if (
@@ -2232,14 +2028,8 @@ function squareClicked(square) {
     }
 
 
-    /* ================================================
-       SELECT PIECE
-    ================================================= */
-
     const piece =
-        game.get(
-            square
-        );
+        game.get(square);
 
 
     if (
@@ -2265,7 +2055,6 @@ function selectSquare(square) {
     selectedSquare =
         square;
 
-
     legalMoves =
         game.moves({
 
@@ -2276,7 +2065,6 @@ function selectSquare(square) {
                 true
 
         });
-
 
     renderBoard();
 
@@ -2321,8 +2109,72 @@ function sendMove(
     }
 
 
+    const movingPiece =
+        game.get(from);
+
+
+    if (!movingPiece) {
+        return;
+    }
+
+
+    let move;
+
+
+    try {
+
+        move =
+            game.move({
+
+                from:
+                    from,
+
+                to:
+                    to,
+
+                promotion:
+                    promotion
+
+            });
+
+    }
+    catch(error) {
+
+        console.error(
+            "Move error:",
+            error
+        );
+
+        return;
+
+    }
+
+
+    if (!move) {
+
+        return;
+
+    }
+
+
+    lastMove = {
+
+        from:
+            from,
+
+        to:
+            to
+
+    };
+
+
+    moveHistory.push(
+        move.san
+    );
+
+
     socket.emit(
-        "chessMove",
+        "chess:move",
         {
 
             from:
@@ -2332,7 +2184,24 @@ function sendMove(
                 to,
 
             promotion:
-                promotion
+                promotion,
+
+            fen:
+                game.fen(),
+
+            san:
+                move.san
+
+        }
+    );
+
+
+    socket.emit(
+        "chess:state",
+        {
+
+            fen:
+                game.fen()
 
         }
     );
@@ -2340,10 +2209,117 @@ function sendMove(
 
     clearSelection();
 
+
     mainStatus.textContent =
-        "Move sent...";
+        "Move sent.";
+
+    updateGameStatus();
 
     renderBoard();
+
+}
+
+
+/* =====================================================
+   APPLY OPPONENT MOVE
+===================================================== */
+
+function applyOpponentMove(data) {
+
+    try {
+
+        const move =
+            game.move({
+
+                from:
+                    data.from,
+
+                to:
+                    data.to,
+
+                promotion:
+                    data.promotion ||
+                    "q"
+
+            });
+
+
+        if (!move) {
+
+            if (data.fen) {
+
+                game.load(
+                    data.fen
+                );
+
+            }
+
+            renderBoard();
+
+            updateUI();
+
+            return;
+
+        }
+
+
+        lastMove = {
+
+            from:
+                data.from,
+
+            to:
+                data.to
+
+        };
+
+
+        moveHistory.push(
+            move.san
+        );
+
+
+        clearSelection();
+
+
+        mainStatus.textContent =
+            "Opponent moved.";
+
+
+        updateGameStatus();
+
+        renderBoard();
+
+    }
+    catch(error) {
+
+        console.error(
+            "Could not apply opponent move:",
+            error
+        );
+
+
+        if (data.fen) {
+
+            try {
+
+                game.load(
+                    data.fen
+                );
+
+            }
+            catch(e) {
+
+                console.error(e);
+
+            }
+
+        }
+
+
+        renderBoard();
+
+    }
 
 }
 
@@ -2369,10 +2345,6 @@ function hidePromotion() {
 
 }
 
-
-/* =====================================================
-   PROMOTION BUTTONS
-===================================================== */
 
 document
     .querySelectorAll(
@@ -2423,7 +2395,7 @@ document
 
 
 /* =====================================================
-   UPDATE UI
+   UI
 ===================================================== */
 
 function updateUI() {
@@ -2443,12 +2415,10 @@ function updateUI() {
         " to move";
 
 
-    if (
-        !roomId
-    ) {
+    if (!roomId) {
 
         mainStatus.textContent =
-            "Waiting for opponent";
+            "Waiting for game room.";
 
         return;
 
@@ -2456,82 +2426,65 @@ function updateUI() {
 
 
     if (
-        myColor === "white"
+        !myColor
     ) {
 
-        if (
+        return;
+
+    }
+
+
+    const myTurn =
+        (
+            myColor === "white" &&
             turn === "w"
-        ) {
-
-            mainStatus.textContent =
-                "Your turn";
-
-        }
-        else {
-
-            mainStatus.textContent =
-                "Opponent's turn";
-
-        }
-
-    }
-    else if (
-        myColor === "black"
-    ) {
-
-        if (
+        )
+        ||
+        (
+            myColor === "black" &&
             turn === "b"
-        ) {
-
-            mainStatus.textContent =
-                "Your turn";
-
-        }
-        else {
-
-            mainStatus.textContent =
-                "Opponent's turn";
-
-        }
-
-    }
+        );
 
 
-    if (
-        game.isCheck()
-    ) {
+    if (myTurn) {
 
         mainStatus.textContent =
-            turnName +
-            " is in check.";
+            "Your turn";
+
+    }
+    else {
+
+        mainStatus.textContent =
+            "Opponent's turn";
 
     }
 
+
+    updateGameStatus();
+
+}
+
+
+/* =====================================================
+   GAME STATUS
+===================================================== */
+
+function updateGameStatus() {
 
     if (
         game.isCheckmate()
     ) {
 
         const winner =
-            turn === "w"
+            game.turn() === "w"
                 ? "Black"
                 : "White";
 
-
-        mainStatus.textContent =
-            "Checkmate — " +
+        gameStatus.textContent =
             winner +
-            " wins.";
+            " wins by checkmate.";
 
-    }
-
-
-    if (
-        game.isStalemate()
-    ) {
-
-        mainStatus.textContent =
-            "Stalemate — draw.";
+        return;
 
     }
 
@@ -2540,116 +2493,44 @@ function updateUI() {
         game.isDraw()
     ) {
 
-        mainStatus.textContent =
-            "Draw.";
+        gameStatus.textContent =
+            "Game drawn.";
+
+        return;
+
+    }
+
+
+    if (
+        game.isCheck()
+    ) {
+
+        gameStatus.textContent =
+            game.turn() === "w"
+                ? "White is in check."
+                : "Black is in check.";
+
+        return;
 
     }
 
 
     gameStatus.textContent =
-        roomId
-            ? "Game connected."
-            : "Waiting for a player...";
+        "Chess game in progress.";
 
 }
 
 
 /* =====================================================
-   HISTORY
+   CAPTURED PIECES
 ===================================================== */
 
-function renderHistory() {
+function updateCaptured() {
 
-    historyElement.innerHTML = "";
+    capturedWhite.innerHTML = "";
 
+    capturedBlack.innerHTML = "";
 
-    const history =
-        game.history();
-
-
-    for (
-        let i = 0;
-        i < history.length;
-        i += 2
-    ) {
-
-        const row =
-            document.createElement(
-                "div"
-            );
-
-
-        row.className =
-            "history-row";
-
-
-        const number =
-            document.createElement(
-                "span"
-            );
-
-
-        number.className =
-            "history-number";
-
-
-        number.textContent =
-            (
-                Math.floor(i / 2) + 1
-            ) +
-            ".";
-
-
-        const moves =
-            document.createElement(
-                "span"
-            );
-
-
-        moves.textContent =
-            history[i] +
-            (
-                history[i + 1]
-                    ? "   " + history[i + 1]
-                    : ""
-            );
-
-
-        row.appendChild(
-            number
-        );
-
-        row.appendChild(
-            moves
-        );
-
-
-        historyElement.appendChild(
-            row
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   CAPTURED
-===================================================== */
-
-function renderCaptured() {
-
-    capturedWhite.innerHTML =
-        "";
-
-    capturedBlack.innerHTML =
-        "";
-
-
-    /*
-     * Reconstruct captured pieces
-     * from the move history.
-     */
 
     const original = {
 
@@ -2686,19 +2567,13 @@ function renderCaptured() {
     };
 
 
-    const position =
-        game.board();
-
-
-    position.forEach(
+    game.board().forEach(
         row => {
 
             row.forEach(
                 piece => {
 
-                    if (
-                        piece
-                    ) {
+                    if (piece) {
 
                         current[
                             piece.color
@@ -2715,19 +2590,14 @@ function renderCaptured() {
     );
 
 
-    const types =
-        [
-            "q",
-            "r",
-            "b",
-            "n",
-            "p"
-        ];
+    const types = [
+        "q",
+        "r",
+        "b",
+        "n",
+        "p"
+    ];
 
-
-    /*
-     * White captured black pieces
-     */
 
     types.forEach(
         type => {
@@ -2748,10 +2618,8 @@ function renderCaptured() {
                         "span"
                     );
 
-
                 span.textContent =
                     PIECES.b[type];
-
 
                 capturedWhite.appendChild(
                     span
@@ -2762,10 +2630,6 @@ function renderCaptured() {
         }
     );
 
-
-    /*
-     * Black captured white pieces
-     */
 
     types.forEach(
         type => {
@@ -2786,10 +2650,8 @@ function renderCaptured() {
                         "span"
                     );
 
-
                 span.textContent =
                     PIECES.w[type];
-
 
                 capturedBlack.appendChild(
                     span
@@ -2804,11 +2666,86 @@ function renderCaptured() {
 
 
 /* =====================================================
+   HISTORY
+===================================================== */
+
+function updateHistory() {
+
+    historyElement.innerHTML = "";
+
+
+    for (
+        let i = 0;
+        i < moveHistory.length;
+        i++
+    ) {
+
+        const row =
+            document.createElement(
+                "div"
+            );
+
+        row.className =
+            "history-row";
+
+
+        const number =
+            document.createElement(
+                "span"
+            );
+
+        number.className =
+            "history-number";
+
+
+        number.textContent =
+            Math.floor(i / 2) + 1 +
+            (
+                i % 2 === 0
+                    ? "."
+                    : "..."
+            );
+
+
+        const move =
+            document.createElement(
+                "span"
+            );
+
+        move.textContent =
+            moveHistory[i];
+
+
+        row.appendChild(
+            number
+        );
+
+        row.appendChild(
+            move
+        );
+
+
+        historyElement.appendChild(
+            row
+        );
+
+    }
+
+
+    historyElement.scrollTop =
+        historyElement.scrollHeight;
+
+}
+
+
+/* =====================================================
    FLIP
 ===================================================== */
 
 document
-    .getElementById("flipButton")
+    .getElementById(
+        "flipButton"
+    )
     .addEventListener(
         "click",
         () => {
@@ -2823,23 +2760,37 @@ document
 
 
 /* =====================================================
-   NEW
+   SYNC
 ===================================================== */
 
 document
-    .getElementById("newButton")
+    .getElementById(
+        "newButton"
+    )
     .addEventListener(
         "click",
         () => {
 
-            /*
-             * Don't reset the server game.
-             *
-             * For now this simply asks the server
-             * for the latest real state.
-             */
+            if (
+                socket &&
+                socket.connected &&
+                roomId
+            ) {
 
-            requestGameState();
+                socket.emit(
+                    "chess:state",
+                    {
+
+                        fen:
+                            game.fen()
+
+                    }
+                );
+
+                mainStatus.textContent =
+                    "Game synchronized.";
+
+            }
 
         }
     );
@@ -2850,10 +2801,24 @@ document
 ===================================================== */
 
 document
-    .getElementById("backButton")
+    .getElementById(
+        "backButton"
+    )
     .addEventListener(
         "click",
         () => {
+
+            if (
+                socket &&
+                socket.connected
+            ) {
+
+                socket.emit(
+                    "room:leave"
+                );
+
+            }
+
 
             window.location.href =
                 "games.html";
@@ -2866,24 +2831,9 @@ document
    START
 ===================================================== */
 
-if (
-    myId
-) {
-
-    myIdElement.textContent =
-        myId;
-
-}
-
+renderBoard();
 
 connectToServer();
-
-
-/* =====================================================
-   INITIAL BOARD
-===================================================== */
-
-renderBoard();
 
 </script>
 
