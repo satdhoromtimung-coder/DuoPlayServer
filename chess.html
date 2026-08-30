@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>DuoPlay — Chess</title>
+<title>DuoPlay Chess</title>
 
 <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/1.4.0/chess.min.js"></script>
 
 <style>
 * {
@@ -16,1592 +16,934 @@
 html,
 body {
     margin: 0;
+    width: 100%;
     min-height: 100%;
+    font-family: Arial, sans-serif;
+    color: white;
 }
 
 body {
     min-height: 100vh;
     overflow-x: hidden;
-
-    font-family: Arial, sans-serif;
-
-    color: white;
-
     background:
+        linear-gradient(
+            rgba(100, 160, 135, 0.35),
+            rgba(10, 70, 50, 0.65)
+        ),
         linear-gradient(
             180deg,
-            #79c9c5 0%,
-            #a8ddd0 34%,
-            #709b70 68%,
-            #153d2c 100%
+            #a8ddd2 0%,
+            #82b79c 48%,
+            #356e52 49%,
+            #174b38 100%
         );
+    position: relative;
 }
 
-/* =====================================================
-   BACKGROUND
-===================================================== */
-
-.background {
-    position: fixed;
-    inset: 0;
-
-    z-index: -10;
-
-    overflow: hidden;
-}
-
-.sun {
-    position: absolute;
-
-    width: 140px;
-    height: 140px;
-
-    top: 7%;
-    right: 9%;
-
-    border-radius: 50%;
-
-    background:
-        radial-gradient(
-            circle,
-            #fffde3,
-            #ffe8a0 55%,
-            #ffd36d
-        );
-
-    box-shadow:
-        0 0 55px #ffe8a0;
-}
-
-.cloud {
-    position: absolute;
-
-    width: 190px;
-    height: 45px;
-
-    border-radius: 50px;
-
-    background:
-        rgba(255,255,255,.32);
-
-    animation:
-        cloudMove 50s linear infinite;
-}
-
-.cloud::before,
-.cloud::after {
+/* Mountain background */
+body::before,
+body::after {
     content: "";
-
-    position: absolute;
-
-    border-radius: 50%;
-
-    background:
-        rgba(255,255,255,.35);
-}
-
-.cloud::before {
-    width: 80px;
-    height: 80px;
-
-    left: 25px;
-    bottom: 0;
-}
-
-.cloud::after {
-    width: 62px;
-    height: 62px;
-
-    right: 25px;
-    bottom: 0;
-}
-
-.cloud.one {
-    top: 15%;
-    left: -230px;
-}
-
-.cloud.two {
-    top: 30%;
-    left: -350px;
-
-    transform: scale(.7);
-
-    animation-duration: 65s;
-    animation-delay: -20s;
-}
-
-@keyframes cloudMove {
-
-    from {
-        margin-left: 0;
-    }
-
-    to {
-        margin-left:
-            calc(100vw + 600px);
-    }
-
-}
-
-.mountains {
-    position: absolute;
-
-    left: 0;
-    right: 0;
-    bottom: 21%;
-
-    height: 46%;
-}
-
-.mountain {
-    position: absolute;
-
-    bottom: 0;
-
+    position: fixed;
+    bottom: 16%;
     width: 0;
     height: 0;
-
-    border-left:
-        230px solid transparent;
-
-    border-right:
-        230px solid transparent;
-
-    border-bottom:
-        350px solid #628a80;
+    border-left: 180px solid transparent;
+    border-right: 180px solid transparent;
+    border-bottom: 310px solid rgba(40, 90, 75, 0.48);
+    z-index: 0;
 }
 
-.mountain.one {
-    left: -180px;
+body::before {
+    left: -100px;
 }
 
-.mountain.two {
-    left: 17%;
-
-    transform: scale(.78);
+body::after {
+    right: -100px;
+    border-bottom-color: rgba(35, 85, 68, 0.42);
 }
 
-.mountain.three {
-    left: 43%;
-
-    transform: scale(1.12);
-
-    border-bottom-color:
-        #547b71;
-}
-
-.mountain.four {
-    left: 72%;
-
-    transform: scale(.8);
-}
-
-.ground {
-    position: absolute;
-
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    height: 22%;
-
-    background:
-        linear-gradient(
-            to top,
-            #153d2c,
-            rgba(35,100,67,.72)
-        );
-}
-
-/* =====================================================
-   HEADER
-===================================================== */
-
-header {
-    min-height: 72px;
-
-    padding:
-        12px 24px;
-
+/* Header */
+.header {
+    height: 62px;
     display: flex;
-
     align-items: center;
     justify-content: space-between;
-
-    background:
-        rgba(8,47,37,.18);
-
-    border-bottom:
-        1px solid rgba(255,255,255,.12);
+    padding: 0 28px;
+    background: rgba(7, 35, 29, 0.72);
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+    position: relative;
+    z-index: 5;
 }
 
 .logo {
-    font-family: Georgia, serif;
-
-    font-size: 34px;
-
-    font-weight: bold;
-
-    color: #ffe19a;
-
-    text-shadow:
-        0 3px 8px rgba(0,0,0,.25);
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: #fff4c9;
 }
 
-.room-info {
+.connection {
     display: flex;
-
     align-items: center;
-
-    gap: 10px;
+    gap: 8px;
+    font-size: 15px;
 }
 
-.room-id {
-    padding:
-        9px 13px;
-
-    border-radius: 20px;
-
-    background:
-        rgba(8,47,37,.62);
-
-    color: #cde2da;
-
-    font-family: monospace;
-
-    font-size: 12px;
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #f2bd57;
 }
 
-.leave-btn {
-    border: 0;
-
-    padding:
-        9px 13px;
-
-    border-radius: 11px;
-
-    cursor: pointer;
-
-    background:
-        rgba(255,255,255,.12);
-
-    color: white;
-
-    font-weight: bold;
+.dot.connected {
+    background: #36d477;
 }
 
-/* =====================================================
-   MAIN
-===================================================== */
+/* Main */
+.main {
+    position: relative;
+    z-index: 2;
+    width: min(1200px, 96%);
+    margin: 22px auto 40px;
+}
 
-main {
-    width:
-        min(760px, 94%);
-
-    margin:
-        25px auto 60px;
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
 }
 
 .game-title {
-    margin: 0;
-
-    text-align: center;
-
-    font-family: Georgia, serif;
-
-    font-size:
-        clamp(36px, 6vw, 52px);
-
-    color: #fff0bd;
-
-    text-shadow:
-        0 5px 18px rgba(0,0,0,.25);
+    font-size: 27px;
+    font-weight: 800;
 }
 
-.status {
-    margin:
-        7px auto 20px;
-
-    width: fit-content;
-
-    padding:
-        8px 16px;
-
-    border-radius: 20px;
-
-    background:
-        rgba(8,47,37,.65);
-
-    color: #dcece6;
-
-    font-size: 13px;
+.back-btn {
+    border: 0;
+    border-radius: 22px;
+    padding: 11px 20px;
+    color: white;
+    background: rgba(7, 50, 40, 0.75);
+    cursor: pointer;
+    font-size: 15px;
 }
 
-/* =====================================================
-   PLAYERS
-===================================================== */
+.back-btn:hover {
+    background: rgba(7, 50, 40, 0.95);
+}
 
-.players {
-    display: flex;
-
+/* Layout */
+.game-layout {
+    display: grid;
+    grid-template-columns: minmax(500px, 760px) 290px;
+    gap: 22px;
     justify-content: center;
-
-    gap: 15px;
-
-    margin-bottom: 18px;
 }
 
-.player-card {
-    min-width: 145px;
-
-    padding:
-        11px 15px;
-
-    border-radius: 14px;
-
-    background:
-        rgba(8,47,37,.70);
-
-    border:
-        1px solid rgba(255,255,255,.12);
-
-    text-align: center;
+/* Board panel */
+.board-panel {
+    background: rgba(5, 57, 45, 0.90);
+    border-radius: 26px;
+    padding: 22px;
+    box-shadow: 0 18px 45px rgba(0,0,0,0.28);
 }
 
-.player-label {
-    display: block;
-
-    margin-bottom: 4px;
-
-    color: #a9cfc3;
-
-    font-size: 11px;
-
-    letter-spacing: 1px;
+.player-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 13px;
+    padding: 8px 12px;
 }
 
 .player-name {
-    color: #ffe39a;
-
-    font-family: monospace;
-
-    font-size: 14px;
-
-    font-weight: bold;
+    font-size: 18px;
+    font-weight: 700;
 }
 
-/* =====================================================
-   CHESS BOARD
-===================================================== */
-
-.board-wrapper {
-    width:
-        min(620px, 92vw);
-
-    margin:
-        0 auto;
-
-    padding: 10px;
-
-    border-radius: 18px;
-
-    background:
-        rgba(7,34,27,.82);
-
-    box-shadow:
-        0 25px 65px rgba(0,0,0,.38);
-
-    border:
-        1px solid rgba(255,255,255,.14);
+.player-color {
+    color: #ffdf88;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
 }
 
-.board {
-    width: 100%;
-
+/* Chess board */
+#board {
+    width: min(100%, 700px);
     aspect-ratio: 1 / 1;
-
+    margin: auto;
     display: grid;
-
-    grid-template-columns:
-        repeat(8, 1fr);
-
+    grid-template-columns: repeat(8, 1fr);
+    border: 6px solid #073b2e;
+    border-radius: 15px;
     overflow: hidden;
-
-    border-radius: 8px;
+    box-shadow:
+        0 12px 30px rgba(0,0,0,0.35),
+        0 0 0 2px rgba(255,220,140,0.35);
 }
-
-/* =====================================================
-   SQUARES
-===================================================== */
 
 .square {
     position: relative;
-
     display: flex;
-
     align-items: center;
     justify-content: center;
-
     cursor: pointer;
-
     user-select: none;
-
     aspect-ratio: 1 / 1;
 }
 
 .light {
-    background:
-        #f0d9b5;
+    background: #f1ddb4;
 }
 
 .dark {
-    background:
-        #b58863;
+    background: #b88d67;
 }
 
 .square.selected {
-    box-shadow:
-        inset 0 0 0 5px
-        rgba(255,220,100,.75);
+    box-shadow: inset 0 0 0 5px rgba(255, 215, 74, 0.9);
 }
 
 .square.legal::after {
     content: "";
-
-    position: absolute;
-
-    width: 25%;
-
-    aspect-ratio: 1 / 1;
-
+    width: 22%;
+    height: 22%;
     border-radius: 50%;
-
-    background:
-        rgba(20,60,35,.55);
+    background: rgba(30, 100, 70, 0.55);
+    position: absolute;
 }
 
 .square.capture::after {
     content: "";
-
     position: absolute;
-
-    inset: 8%;
-
+    width: 78%;
+    height: 78%;
     border-radius: 50%;
-
-    border:
-        5px solid rgba(180,50,40,.65);
+    border: 5px solid rgba(180, 55, 45, 0.55);
 }
 
-/* =====================================================
-   CHESS PIECES
-===================================================== */
-
 .piece {
-    position: relative;
-
-    z-index: 2;
-
-    font-family:
-        "DejaVu Sans",
-        "Segoe UI Symbol",
-        serif;
-
-    font-size:
-        clamp(31px, 7.5vw, 66px);
-
+    font-size: clamp(34px, 6vw, 68px);
     line-height: 1;
-
-    cursor: pointer;
-
-    user-select: none;
-
-    filter:
-        drop-shadow(
-            0 3px 2px
-            rgba(0,0,0,.38)
-        );
+    position: relative;
+    z-index: 2;
+    text-shadow:
+        1px 2px 2px rgba(0,0,0,0.55);
 }
 
 .white-piece {
-    color: #fffaf0;
-
-    text-shadow:
-        0 1px 2px #555,
-        0 0 2px #333;
+    color: #fff8e8;
 }
 
 .black-piece {
-    color: #171717;
-
-    text-shadow:
-        0 1px 1px rgba(255,255,255,.25);
+    color: #29251f;
 }
 
-/* =====================================================
-   RESULT
-===================================================== */
+/* Side panel */
+.side {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
 
-.result-overlay {
-    position: fixed;
-
-    inset: 0;
-
-    z-index: 100;
-
-    display: none;
-
-    align-items: center;
-    justify-content: center;
-
+.card {
+    background: rgba(5, 57, 45, 0.90);
+    border-radius: 20px;
     padding: 20px;
-
-    background:
-        rgba(0,0,0,.62);
-
-    backdrop-filter:
-        blur(8px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.20);
 }
 
-.result-overlay.show {
-    display: flex;
+.card-label {
+    color: #f4cf75;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    margin-bottom: 9px;
 }
 
-.result-box {
-    width:
-        min(390px, 100%);
-
-    padding:
-        32px 25px;
-
-    border-radius: 25px;
-
-    text-align: center;
-
-    background:
-        linear-gradient(
-            145deg,
-            #164b3c,
-            #082e24
-        );
-
-    border:
-        1px solid rgba(255,255,255,.17);
-
-    box-shadow:
-        0 30px 90px rgba(0,0,0,.55);
+.card-value {
+    font-size: 20px;
+    font-weight: 700;
 }
 
-.result-icon {
-    font-size: 54px;
-
-    margin-bottom: 8px;
+.status {
+    min-height: 45px;
+    line-height: 1.4;
 }
 
-.result-box h2 {
-    margin:
-        0 0 8px;
-
-    color: #ffe4a0;
-
-    font-family: Georgia, serif;
+.last-move {
+    min-height: 25px;
+    color: #f6dfab;
 }
 
-.result-box p {
-    margin:
-        0 0 22px;
-
-    color: #c9dfd7;
-}
-
-.result-buttons {
-    display: flex;
-
-    gap: 10px;
-}
-
-.result-buttons button {
-    flex: 1;
-
-    border: 0;
-
-    padding: 13px;
-
-    border-radius: 13px;
-
-    cursor: pointer;
-
-    font-weight: bold;
-}
-
-.back-btn {
-    background:
-        linear-gradient(
-            135deg,
-            #f7d987,
-            #dca84f
-        );
-
-    color: #2c210f;
-}
-
-/* =====================================================
-   TOAST
-===================================================== */
-
-.toast {
-    position: fixed;
-
-    left: 50%;
-    bottom: 25px;
-
-    z-index: 200;
-
-    transform:
-        translate(-50%, 30px);
-
-    opacity: 0;
-
-    pointer-events: none;
-
-    padding:
-        13px 19px;
-
-    border-radius: 13px;
-
-    background:
-        rgba(7,32,26,.95);
-
-    border:
-        1px solid rgba(255,255,255,.15);
-
-    color: white;
-
+.moves {
+    max-height: 180px;
+    overflow-y: auto;
+    color: #e7e0cc;
     font-size: 14px;
-
-    transition:
-        opacity .2s ease,
-        transform .2s ease;
+    line-height: 1.8;
 }
 
-.toast.show {
-    opacity: 1;
-
-    transform:
-        translate(-50%, 0);
+.waiting {
+    color: #f5d57b;
 }
 
-/* =====================================================
-   MOBILE
-===================================================== */
+.success {
+    color: #55e391;
+}
 
-@media(max-width:600px) {
+.error {
+    color: #ff8f8f;
+}
 
-    header {
-        padding:
-            10px 14px;
+.turn-active {
+    color: #55e391;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .game-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .side {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .board-panel {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 600px) {
+    .header {
+        padding: 0 15px;
     }
 
     .logo {
-        font-size: 27px;
+        font-size: 24px;
     }
 
-    .room-id {
-        display: none;
+    .game-title {
+        font-size: 22px;
     }
 
-    main {
-        margin-top: 20px;
+    .main {
+        width: 98%;
+        margin-top: 12px;
     }
 
-    .players {
-        gap: 8px;
+    .side {
+        grid-template-columns: 1fr;
     }
 
-    .player-card {
-        min-width: 125px;
-
-        padding:
-            9px 10px;
+    .piece {
+        font-size: 10vw;
     }
-
-    .board-wrapper {
-        padding: 7px;
-    }
-
 }
 </style>
 </head>
 
 <body>
 
-<!-- =====================================================
-     BACKGROUND
-===================================================== -->
+<header class="header">
+    <div class="logo">DuoPlay</div>
 
-<div class="background">
-
-    <div class="sun"></div>
-
-    <div class="cloud one"></div>
-    <div class="cloud two"></div>
-
-    <div class="mountains">
-
-        <div class="mountain one"></div>
-        <div class="mountain two"></div>
-        <div class="mountain three"></div>
-        <div class="mountain four"></div>
-
+    <div class="connection">
+        <span class="dot" id="connectionDot"></span>
+        <span id="connectionText">Connecting...</span>
     </div>
-
-    <div class="ground"></div>
-
-</div>
-
-
-<!-- =====================================================
-     HEADER
-===================================================== -->
-
-<header>
-
-    <div class="logo">
-        DuoPlay
-    </div>
-
-    <div class="room-info">
-
-        <div
-            id="roomId"
-            class="room-id"
-        >
-            Room: ------
-        </div>
-
-        <button
-            id="leaveBtn"
-            class="leave-btn"
-        >
-            LEAVE
-        </button>
-
-    </div>
-
 </header>
 
+<main class="main">
 
-<!-- =====================================================
-     MAIN
-===================================================== -->
+    <div class="topbar">
+        <div class="game-title">Chess</div>
 
-<main>
-
-    <h1 class="game-title">
-        Chess
-    </h1>
-
-    <div
-        id="status"
-        class="status"
-    >
-        Connecting to Chess...
+        <button class="back-btn" onclick="goBack()">
+            ← Game Room
+        </button>
     </div>
 
+    <div class="game-layout">
 
-    <div class="players">
+        <section class="board-panel">
 
-        <div class="player-card">
+            <div class="player-bar">
+                <div class="player-name" id="opponentName">
+                    Opponent
+                </div>
 
-            <span class="player-label">
-                WHITE
-            </span>
+                <div class="player-color" id="opponentColor">
+                    Waiting
+                </div>
+            </div>
 
-            <span
-                id="whitePlayer"
-                class="player-name"
-            >
-                ----
-            </span>
+            <div id="board"></div>
 
-        </div>
+            <div class="player-bar">
+                <div class="player-name" id="myName">
+                    You
+                </div>
 
-        <div class="player-card">
+                <div class="player-color" id="myColor">
+                    Waiting
+                </div>
+            </div>
 
-            <span class="player-label">
-                BLACK
-            </span>
+        </section>
 
-            <span
-                id="blackPlayer"
-                class="player-name"
-            >
-                ----
-            </span>
+        <aside class="side">
 
-        </div>
+            <div class="card">
+                <div class="card-label">YOUR COLOR</div>
+                <div class="card-value" id="colorText">
+                    Waiting...
+                </div>
+            </div>
 
-    </div>
+            <div class="card">
+                <div class="card-label">TURN</div>
+                <div class="card-value" id="turnText">
+                    Waiting...
+                </div>
+            </div>
 
+            <div class="card">
+                <div class="card-label">STATUS</div>
+                <div class="card-value status" id="statusText">
+                    Connecting to DuoPlay...
+                </div>
+            </div>
 
-    <!-- =================================================
-         BOARD
-    ================================================== -->
+            <div class="card">
+                <div class="card-label">LAST ACTION</div>
+                <div class="card-value last-move" id="lastMove">
+                    Waiting...
+                </div>
+            </div>
 
-    <div class="board-wrapper">
+            <div class="card">
+                <div class="card-label">MOVE HISTORY</div>
+                <div class="moves" id="moveHistory">
+                    No moves yet.
+                </div>
+            </div>
 
-        <div
-            id="board"
-            class="board"
-        ></div>
+        </aside>
 
     </div>
 
 </main>
 
-
-<!-- =====================================================
-     RESULT
-===================================================== -->
-
-<div
-    id="resultOverlay"
-    class="result-overlay"
->
-
-    <div class="result-box">
-
-        <div
-            id="resultIcon"
-            class="result-icon"
-        >
-            ♛
-        </div>
-
-        <h2 id="resultTitle">
-            Game Over
-        </h2>
-
-        <p id="resultText">
-            Chess game finished.
-        </p>
-
-        <div class="result-buttons">
-
-            <button
-                id="backBtn"
-                class="back-btn"
-            >
-                BACK TO PLAYERS
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     TOAST
-===================================================== -->
-
-<div
-    id="toast"
-    class="toast"
-></div>
-
-
 <script>
-
 /* =====================================================
-   SERVER
-===================================================== */
+   DUOPLAY CHESS CLIENT
+   ===================================================== */
 
-const SERVER =
-    window.location.origin;
+const SERVER_URL = "https://duoplayserver.onrender.com";
 
+const socket = io(SERVER_URL, {
+    transports: ["websocket", "polling"]
+});
 
-/* =====================================================
-   PLAYER ID
-===================================================== */
+let chess = new Chess();
 
-const myPlayerId =
-    localStorage.getItem(
-        "duoplayPlayerId"
-    );
+let playerId =
+    localStorage.getItem("duoplay_player_id");
 
+let gameId = null;
+let myColor = null;
+let opponentId = null;
 
-/* =====================================================
-   SAVED GAME
-===================================================== */
-
-let savedGame = null;
-
-try {
-
-    savedGame =
-        JSON.parse(
-            localStorage.getItem(
-                "duoplayGame"
-            ) || "null"
-        );
-
-}
-catch {
-
-    savedGame = null;
-
-}
-
-
-/* =====================================================
-   SOCKET
-===================================================== */
-
-const socket =
-    io(
-        SERVER,
-        {
-            transports: [
-                "websocket",
-                "polling"
-            ],
-
-            auth: {
-                playerId:
-                    myPlayerId || null
-            },
-
-            reconnection: true
-        }
-    );
+let selectedSquare = null;
+let gameStarted = false;
 
 
 /* =====================================================
    ELEMENTS
-===================================================== */
+   ===================================================== */
 
-const board =
-    document.getElementById(
-        "board"
-    );
+const boardElement =
+    document.getElementById("board");
 
-const status =
-    document.getElementById(
-        "status"
-    );
+const statusText =
+    document.getElementById("statusText");
 
-const roomIdElement =
-    document.getElementById(
-        "roomId"
-    );
+const colorText =
+    document.getElementById("colorText");
 
-const whitePlayer =
-    document.getElementById(
-        "whitePlayer"
-    );
+const turnText =
+    document.getElementById("turnText");
 
-const blackPlayer =
-    document.getElementById(
-        "blackPlayer"
-    );
+const lastMove =
+    document.getElementById("lastMove");
 
-const leaveBtn =
-    document.getElementById(
-        "leaveBtn"
-    );
+const moveHistory =
+    document.getElementById("moveHistory");
 
-const resultOverlay =
-    document.getElementById(
-        "resultOverlay"
-    );
+const myColorElement =
+    document.getElementById("myColor");
 
-const resultTitle =
-    document.getElementById(
-        "resultTitle"
-    );
+const opponentColorElement =
+    document.getElementById("opponentColor");
 
-const resultText =
-    document.getElementById(
-        "resultText"
-    );
+const connectionText =
+    document.getElementById("connectionText");
 
-const resultIcon =
-    document.getElementById(
-        "resultIcon"
-    );
-
-const backBtn =
-    document.getElementById(
-        "backBtn"
-    );
-
-const toast =
-    document.getElementById(
-        "toast"
-    );
+const connectionDot =
+    document.getElementById("connectionDot");
 
 
 /* =====================================================
-   GAME STATE
-===================================================== */
+   CONNECTION
+   ===================================================== */
 
-let gameData =
-    savedGame;
+socket.on("connect", () => {
 
-let myColor =
-    null;
+    connectionText.textContent = "Connected";
+    connectionDot.classList.add("connected");
 
-let currentTurn =
-    "white";
-
-let selectedSquare =
-    null;
-
-let boardPosition =
-    null;
-
-let gameFinished =
-    false;
-
-
-/* =====================================================
-   CHESS START POSITION
-===================================================== */
-
-const START_POSITION = [
-
-    [
-        "black-rook",
-        "black-knight",
-        "black-bishop",
-        "black-queen",
-        "black-king",
-        "black-bishop",
-        "black-knight",
-        "black-rook"
-    ],
-
-    [
-        "black-pawn",
-        "black-pawn",
-        "black-pawn",
-        "black-pawn",
-        "black-pawn",
-        "black-pawn",
-        "black-pawn",
-        "black-pawn"
-    ],
-
-    [
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-    ],
-
-    [
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-    ],
-
-    [
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-    ],
-
-    [
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-    ],
-
-    [
-        "white-pawn",
-        "white-pawn",
-        "white-pawn",
-        "white-pawn",
-        "white-pawn",
-        "white-pawn",
-        "white-pawn",
-        "white-pawn"
-    ],
-
-    [
-        "white-rook",
-        "white-knight",
-        "white-bishop",
-        "white-queen",
-        "white-king",
-        "white-bishop",
-        "white-knight",
-        "white-rook"
-    ]
-
-];
-
-
-/* =====================================================
-   PIECES
-===================================================== */
-
-const PIECES = {
-
-    "white-king": "♔",
-    "white-queen": "♕",
-    "white-rook": "♖",
-    "white-bishop": "♗",
-    "white-knight": "♘",
-    "white-pawn": "♙",
-
-    "black-king": "♚",
-    "black-queen": "♛",
-    "black-rook": "♜",
-    "black-bishop": "♝",
-    "black-knight": "♞",
-    "black-pawn": "♟"
-
-};
-
-
-/* =====================================================
-   INITIALIZE GAME
-===================================================== */
-
-function initializeGame(data) {
-
-    if (!data) {
-
-        status.textContent =
-            "Chess room not found.";
-
-        return;
-
-    }
-
-    gameData =
-        data;
-
-    myColor =
-        data.color;
-
-    currentTurn =
-        data.turn ||
-        "white";
-
-
-    roomIdElement.textContent =
-        "Room: " +
-        (
-            data.roomId ||
-            "------"
-        );
-
-
-    whitePlayer.textContent =
-        data.whitePlayerId ||
-        "----";
-
-    blackPlayer.textContent =
-        data.blackPlayerId ||
-        "----";
-
+    statusText.textContent =
+        "Connected to DuoPlay.";
 
     /*
-        Create board from FEN.
+       Register the SAME player ID.
+
+       If localStorage already contains the ID,
+       the server restores that player.
     */
 
-    boardPosition =
-        fenToBoard(
-            data.fen
+    socket.emit(
+        "register-player",
+        playerId || null
+    );
+});
+
+
+socket.on("disconnect", () => {
+
+    connectionText.textContent =
+        "Disconnected";
+
+    connectionDot.classList.remove("connected");
+
+    statusText.textContent =
+        "Connection lost. Reconnecting...";
+
+});
+
+
+socket.on("connect_error", () => {
+
+    connectionText.textContent =
+        "Connection error";
+
+    connectionDot.classList.remove("connected");
+
+    statusText.textContent =
+        "Could not connect to DuoPlay.";
+
+});
+
+
+/* =====================================================
+   PLAYER REGISTERED
+   ===================================================== */
+
+socket.on("player-registered", (data) => {
+
+    if (!data || !data.playerId) {
+        return;
+    }
+
+    playerId = data.playerId;
+
+    /*
+       VERY IMPORTANT:
+
+       Save the ID permanently in this browser.
+       Refreshing does NOT generate another ID.
+    */
+
+    localStorage.setItem(
+        "duoplay_player_id",
+        playerId
+    );
+
+    document.getElementById("myName").textContent =
+        "You • " + playerId;
+
+    tryRecoverGame();
+});
+
+
+/* =====================================================
+   CHESS GAME START
+   ===================================================== */
+
+socket.on("chess-game-start", (data) => {
+
+    console.log("Chess game started:", data);
+
+    if (!data || !data.gameId) {
+        return;
+    }
+
+    gameId = data.gameId;
+    myColor = data.color;
+    opponentId = data.opponentId;
+
+    /*
+       Store the game information.
+
+       This is important if the page is refreshed.
+    */
+
+    sessionStorage.setItem(
+        "duoplay_game_id",
+        gameId
+    );
+
+    sessionStorage.setItem(
+        "duoplay_game_color",
+        myColor
+    );
+
+    sessionStorage.setItem(
+        "duoplay_opponent_id",
+        opponentId
+    );
+
+    startGame();
+});
+
+
+/* =====================================================
+   CHESS GAME JOINED
+   ===================================================== */
+
+socket.on("chess-game-joined", (data) => {
+
+    console.log("Joined chess game:", data);
+
+    if (!data || !data.gameId) {
+        return;
+    }
+
+    gameId = data.gameId;
+    myColor = data.color;
+    opponentId = data.opponentId;
+
+    startGame();
+});
+
+
+/* =====================================================
+   RECOVER GAME
+   ===================================================== */
+
+function tryRecoverGame() {
+
+    const savedGame =
+        sessionStorage.getItem("duoplay_game_id");
+
+    const savedColor =
+        sessionStorage.getItem("duoplay_game_color");
+
+    const savedOpponent =
+        sessionStorage.getItem("duoplay_opponent_id");
+
+    /*
+       If games.html already saved the game information,
+       use it.
+    */
+
+    if (savedGame) {
+
+        gameId = savedGame;
+        myColor = savedColor;
+        opponentId = savedOpponent;
+
+        socket.emit(
+            "join-chess-game",
+            gameId
         );
 
+        return;
+    }
+
+    /*
+       Also support URL:
+
+       chess.html?gameId=xxxxx&color=white
+    */
+
+    const params =
+        new URLSearchParams(window.location.search);
+
+    const urlGameId =
+        params.get("gameId");
+
+    const urlColor =
+        params.get("color");
+
+    if (urlGameId) {
+
+        gameId = urlGameId;
+        myColor = urlColor || "white";
+
+        sessionStorage.setItem(
+            "duoplay_game_id",
+            gameId
+        );
+
+        sessionStorage.setItem(
+            "duoplay_game_color",
+            myColor
+        );
+
+        socket.emit(
+            "join-chess-game",
+            gameId
+        );
+
+        return;
+    }
+
+    /*
+       Do NOT immediately say that the player is not
+       in a game while the socket is still connecting.
+    */
+
+    statusText.textContent =
+        "Waiting for chess game...";
+}
+
+
+/* =====================================================
+   START GAME
+   ===================================================== */
+
+function startGame() {
+
+    if (!gameId || !myColor) {
+        statusText.textContent =
+            "Waiting for chess game...";
+        return;
+    }
+
+    gameStarted = true;
+
+    chess = new Chess();
+
+    selectedSquare = null;
+
+    document.getElementById("myName").textContent =
+        "You • " + playerId;
+
+    document.getElementById("opponentName").textContent =
+        "Opponent • " + (opponentId || "Player");
+
+    myColorElement.textContent =
+        myColor;
+
+    opponentColorElement.textContent =
+        myColor === "white"
+            ? "black"
+            : "white";
+
+    colorText.textContent =
+        myColor.toUpperCase();
+
+    statusText.textContent =
+        "Chess game started.";
+
+    statusText.className =
+        "card-value status success";
 
     renderBoard();
 
-    updateStatus();
+    updateTurn();
 
-}
-
-
-/* =====================================================
-   FEN TO BOARD
-===================================================== */
-
-function fenToBoard(fen) {
-
-    if (!fen) {
-
-        return START_POSITION
-            .map(row => [...row]);
-
-    }
-
-    const boardPart =
-        fen.split(" ")[0];
-
-    const rows =
-        boardPart.split("/");
-
-    const result = [];
-
-
-    for (
-        let r = 0;
-        r < 8;
-        r++
-    ) {
-
-        const row = [];
-
-        for (
-            const char of rows[r]
-        ) {
-
-            if (
-                /[1-8]/.test(char)
-            ) {
-
-                const empty =
-                    Number(char);
-
-                for (
-                    let i = 0;
-                    i < empty;
-                    i++
-                ) {
-
-                    row.push(null);
-
-                }
-
-            }
-            else {
-
-                row.push(
-                    pieceFromFen(char)
-                );
-
-            }
-
-        }
-
-        result.push(row);
-
-    }
-
-    return result;
-
-}
-
-
-/* =====================================================
-   FEN PIECE
-===================================================== */
-
-function pieceFromFen(char) {
-
-    const white =
-        char ===
-        char.toUpperCase();
-
-    const color =
-        white
-            ? "white"
-            : "black";
-
-    const lower =
-        char.toLowerCase();
-
-
-    const names = {
-
-        k: "king",
-        q: "queen",
-        r: "rook",
-        b: "bishop",
-        n: "knight",
-        p: "pawn"
-
-    };
-
-
-    return (
-        color +
-        "-" +
-        names[lower]
+    socket.emit(
+        "join-chess-game",
+        gameId
     );
-
 }
 
 
 /* =====================================================
-   BOARD TO FEN SQUARE
-===================================================== */
-
-function squareName(
-    row,
-    col
-) {
-
-    const files =
-        "abcdefgh";
-
-    const ranks =
-        "87654321";
-
-    return (
-        files[col] +
-        ranks[row]
-    );
-
-}
-
-
-/* =====================================================
-   FIND BOARD POSITION
-===================================================== */
-
-function getPosition(
-    square
-) {
-
-    const files =
-        "abcdefgh";
-
-    const file =
-        files.indexOf(
-            square[0]
-        );
-
-    const rank =
-        Number(
-            square[1]
-        );
-
-    if (
-        file < 0 ||
-        rank < 1 ||
-        rank > 8
-    ) {
-        return null;
-    }
-
-    return {
-
-        row:
-            8 - rank,
-
-        col:
-            file
-
-    };
-
-}
-
-
-/* =====================================================
-   RENDER BOARD
-===================================================== */
+   DRAW BOARD
+   ===================================================== */
 
 function renderBoard() {
 
-    board.innerHTML = "";
+    boardElement.innerHTML = "";
 
+    const board =
+        chess.board();
+
+    let rows = board;
 
     /*
-        Black sees the board from
-        the opposite side.
+       Black player sees the board from black's side.
     */
 
-    const rows =
-        myColor === "black"
-            ? [7,6,5,4,3,2,1,0]
-            : [0,1,2,3,4,5,6,7];
+    if (myColor === "black") {
+        rows = [...board]
+            .reverse()
+            .map(row => [...row].reverse());
+    }
 
-    const cols =
-        myColor === "black"
-            ? [7,6,5,4,3,2,1,0]
-            : [0,1,2,3,4,5,6,7];
+    rows.forEach((row, rowIndex) => {
 
+        row.forEach((piece, colIndex) => {
 
-    rows.forEach(
-        row => {
+            const square =
+                document.createElement("div");
 
-            cols.forEach(
-                col => {
+            const actualRow =
+                myColor === "black"
+                    ? 7 - rowIndex
+                    : rowIndex;
 
-                    const square =
-                        document.createElement(
-                            "div"
-                        );
+            const actualCol =
+                myColor === "black"
+                    ? 7 - colIndex
+                    : colIndex;
 
-                    square.className =
-                        "square";
+            const file =
+                String.fromCharCode(
+                    97 + actualCol
+                );
 
+            const rank =
+                8 - actualRow;
 
-                    const light =
-                        (
-                            row + col
-                        ) % 2 === 0;
+            const squareName =
+                file + rank;
 
+            square.className =
+                "square " +
+                (
+                    (actualRow + actualCol) % 2 === 0
+                        ? "light"
+                        : "dark"
+                );
 
-                    square.classList.add(
-                        light
-                            ? "light"
-                            : "dark"
+            square.dataset.square =
+                squareName;
+
+            if (selectedSquare === squareName) {
+                square.classList.add("selected");
+            }
+
+            if (piece) {
+
+                const pieceElement =
+                    document.createElement("div");
+
+                pieceElement.className =
+                    "piece " +
+                    (
+                        piece.color === "w"
+                            ? "white-piece"
+                            : "black-piece"
                     );
 
-
-                    const name =
-                        squareName(
-                            row,
-                            col
-                        );
-
-
-                    square.dataset.square =
-                        name;
-
-
-                    /*
-                        Selected square.
-                    */
-
-                    if (
-                        selectedSquare ===
-                        name
-                    ) {
-
-                        square.classList.add(
-                            "selected"
-                        );
-
-                    }
-
-
-                    const piece =
-                        boardPosition[row][col];
-
-
-                    if (piece) {
-
-                        const pieceElement =
-                            document.createElement(
-                                "span"
-                            );
-
-                        pieceElement.className =
-                            "piece " +
-                            (
-                                piece.startsWith(
-                                    "white"
-                                )
-                                    ? "white-piece"
-                                    : "black-piece"
-                            );
-
-                        pieceElement.textContent =
-                            PIECES[piece];
-
-                        square.appendChild(
-                            pieceElement
-                        );
-
-                    }
-
-
-                    square.onclick =
-                        () => {
-
-                            handleSquareClick(
-                                name
-                            );
-
-                        };
-
-
-                    board.appendChild(
-                        square
+                pieceElement.textContent =
+                    getPieceSymbol(
+                        piece.color,
+                        piece.type
                     );
 
-                }
+                square.appendChild(
+                    pieceElement
+                );
+            }
+
+            square.addEventListener(
+                "click",
+                () => handleSquareClick(squareName)
             );
 
-        }
-    );
+            boardElement.appendChild(square);
+        });
+    });
 
+    showLegalMoves();
 }
 
 
 /* =====================================================
-   SQUARE CLICK
-===================================================== */
+   CHESS PIECES
+   ===================================================== */
 
-function handleSquareClick(
-    square
-) {
+function getPieceSymbol(color, type) {
 
-    if (gameFinished) {
+    const pieces = {
+
+        w: {
+            p: "♙",
+            r: "♖",
+            n: "♘",
+            b: "♗",
+            q: "♕",
+            k: "♔"
+        },
+
+        b: {
+            p: "♟",
+            r: "♜",
+            n: "♞",
+            b: "♝",
+            q: "♛",
+            k: "♚"
+        }
+    };
+
+    return pieces[color][type];
+}
+
+
+/* =====================================================
+   CLICK SQUARE
+   ===================================================== */
+
+function handleSquareClick(square) {
+
+    if (!gameStarted) {
         return;
     }
 
-
-    if (
-        myColor !== currentTurn
-    ) {
-
-        showToast(
-            "Wait for your turn."
-        );
-
-        return;
-
-    }
-
-
-    const position =
-        getPosition(
-            square
-        );
-
-
-    if (!position) {
+    if (!myColor) {
         return;
     }
 
+    const turn =
+        chess.turn() === "w"
+            ? "white"
+            : "black";
+
+    if (turn !== myColor) {
+
+        statusText.textContent =
+            "Wait for your turn.";
+
+        return;
+    }
 
     const piece =
-        boardPosition
-            [position.row]
-            [position.col];
-
+        chess.get(square);
 
     /*
-        Nothing selected yet.
+       First click: select your own piece.
     */
 
     if (!selectedSquare) {
@@ -1610,448 +952,390 @@ function handleSquareClick(
             return;
         }
 
-
-        const pieceColor =
-            piece.startsWith(
-                "white"
-            )
-                ? "white"
-                : "black";
-
-
         if (
-            pieceColor !==
-            myColor
+            piece.color !==
+            (myColor === "white" ? "w" : "b")
         ) {
-
-            showToast(
-                "That is not your piece."
-            );
-
             return;
-
         }
 
-
-        selectedSquare =
-            square;
+        selectedSquare = square;
 
         renderBoard();
 
         return;
-
     }
 
 
     /*
-        Click same square.
+       Clicking another own piece changes selection.
     */
 
     if (
-        selectedSquare ===
-        square
+        piece &&
+        piece.color ===
+        (myColor === "white" ? "w" : "b")
     ) {
 
-        selectedSquare =
-            null;
+        selectedSquare = square;
 
         renderBoard();
 
         return;
-
     }
 
 
     /*
-        Select another own piece.
+       Try the move.
     */
 
-    if (piece) {
+    const move = chess.move({
+        from: selectedSquare,
+        to: square,
+        promotion: "q"
+    });
 
-        const pieceColor =
-            piece.startsWith(
-                "white"
-            )
-                ? "white"
-                : "black";
+    if (!move) {
 
+        statusText.textContent =
+            "Illegal move.";
 
-        if (
-            pieceColor ===
-            myColor
-        ) {
+        selectedSquare = null;
 
-            selectedSquare =
-                square;
+        renderBoard();
 
-            renderBoard();
-
-            return;
-
-        }
-
+        return;
     }
 
 
-    /*
-        Send move to server.
+    selectedSquare = null;
 
-        The server is the authority
-        and checks the legal move.
+    renderBoard();
+
+    updateTurn();
+
+    addMoveToHistory(move);
+
+    lastMove.textContent =
+        move.san;
+
+
+    /*
+       Send move to opponent.
     */
 
-    socket.emit(
-        "chessMove",
-        {
-            from:
-                selectedSquare,
-
-            to:
-                square,
-
-            promotion:
-                "q"
+    socket.emit("chess-move", {
+        gameId,
+        move: {
+            from: move.from,
+            to: move.to,
+            promotion: move.promotion
         }
-    );
+    });
 
 
-    selectedSquare =
-        null;
-
+    checkGameEnd();
 }
 
 
 /* =====================================================
-   MOVE MADE
-===================================================== */
+   OPPONENT MOVE
+   ===================================================== */
 
-socket.on(
-    "moveMade",
-    data => {
+socket.on("opponent-move", (data) => {
 
-        if (!data) {
-            return;
-        }
-
-
-        boardPosition =
-            fenToBoard(
-                data.fen
-            );
-
-
-        currentTurn =
-            data.turn;
-
-
-        selectedSquare =
-            null;
-
-
-        renderBoard();
-
-        updateStatus();
-
-
-        if (
-            data.check
-        ) {
-
-            showToast(
-                "Check!"
-            );
-
-        }
-
-    }
-);
-
-
-/* =====================================================
-   MOVE ERROR
-===================================================== */
-
-socket.on(
-    "moveError",
-    message => {
-
-        selectedSquare =
-            null;
-
-        renderBoard();
-
-        showToast(
-            message ||
-            "Illegal move."
-        );
-
-    }
-);
-
-
-/* =====================================================
-   UPDATE STATUS
-===================================================== */
-
-function updateStatus() {
-
-    if (gameFinished) {
+    if (!data || !data.move) {
         return;
     }
 
+    if (!gameId) {
+        return;
+    }
 
-    if (
-        myColor ===
-        currentTurn
-    ) {
+    const move = chess.move({
+        from: data.move.from,
+        to: data.move.to,
+        promotion: data.move.promotion || "q"
+    });
 
-        status.textContent =
+    if (!move) {
+
+        console.error(
+            "Opponent move could not be applied."
+        );
+
+        return;
+    }
+
+    selectedSquare = null;
+
+    renderBoard();
+
+    updateTurn();
+
+    addMoveToHistory(move);
+
+    lastMove.textContent =
+        move.san;
+
+    checkGameEnd();
+});
+
+
+/* =====================================================
+   SERVER TURN
+   ===================================================== */
+
+socket.on("chess-turn", (data) => {
+
+    updateTurn();
+});
+
+
+/* =====================================================
+   UPDATE TURN
+   ===================================================== */
+
+function updateTurn() {
+
+    if (!gameStarted) {
+        turnText.textContent =
+            "Waiting...";
+        return;
+    }
+
+    const turn =
+        chess.turn() === "w"
+            ? "white"
+            : "black";
+
+    if (turn === myColor) {
+
+        turnText.textContent =
             "Your turn";
 
-    }
-    else {
+        turnText.className =
+            "card-value turn-active";
 
-        status.textContent =
+        statusText.textContent =
+            "Your move.";
+
+        statusText.className =
+            "card-value status success";
+
+    } else {
+
+        turnText.textContent =
             "Opponent's turn";
 
-    }
+        turnText.className =
+            "card-value";
 
+        statusText.textContent =
+            "Waiting for opponent.";
+
+        statusText.className =
+            "card-value status";
+    }
 }
 
 
 /* =====================================================
-   GAME FINISHED
-===================================================== */
+   LEGAL MOVES
+   ===================================================== */
 
-socket.on(
-    "gameFinished",
-    data => {
+function showLegalMoves() {
 
-        gameFinished =
-            true;
-
-
-        let result =
-            data?.result ||
-            "draw";
-
-
-        if (
-            result ===
-            "draw"
-        ) {
-
-            resultIcon.textContent =
-                "♔";
-
-            resultTitle.textContent =
-                "Draw";
-
-            resultText.textContent =
-                "The Chess game ended in a draw.";
-
-        }
-        else if (
-            result ===
-            myColor
-        ) {
-
-            resultIcon.textContent =
-                "♛";
-
-            resultTitle.textContent =
-                "You Win!";
-
-            resultText.textContent =
-                "Congratulations! You won the Chess game.";
-
-        }
-        else {
-
-            resultIcon.textContent =
-                "♟";
-
-            resultTitle.textContent =
-                "You Lost";
-
-            resultText.textContent =
-                "The other player won the Chess game.";
-
-        }
-
-
-        resultOverlay.classList.add(
-            "show"
-        );
-
+    if (!selectedSquare) {
+        return;
     }
-);
 
+    let moves = [];
 
-/* =====================================================
-   OPPONENT LEFT
-===================================================== */
-
-socket.on(
-    "opponentLeft",
-    data => {
-
-        gameFinished =
-            true;
-
-
-        resultIcon.textContent =
-            "♟";
-
-        resultTitle.textContent =
-            "Opponent Left";
-
-        resultText.textContent =
-            "The other player left the Chess game.";
-
-
-        resultOverlay.classList.add(
-            "show"
-        );
-
+    try {
+        moves =
+            chess.moves({
+                square: selectedSquare,
+                verbose: true
+            });
+    } catch (error) {
+        return;
     }
-);
 
+    moves.forEach(move => {
 
-/* =====================================================
-   SOCKET CONNECT
-===================================================== */
-
-socket.on(
-    "connect",
-    () => {
-
-        console.log(
-            "Chess connected:",
-            socket.id
-        );
-
-        status.textContent =
-            "Connected";
-
-        /*
-            If the saved room is valid,
-            tell the server we are connected.
-
-            The actual game room was already
-            created by the server when the
-            request was accepted.
-        */
-
-    }
-);
-
-
-/* =====================================================
-   SOCKET DISCONNECT
-===================================================== */
-
-socket.on(
-    "disconnect",
-    () => {
-
-        if (!gameFinished) {
-
-            status.textContent =
-                "Connection lost...";
-
-        }
-
-    }
-);
-
-
-/* =====================================================
-   LEAVE
-===================================================== */
-
-function leaveGame() {
-
-    socket.emit(
-        "leaveChess"
-    );
-
-
-    localStorage.removeItem(
-        "duoplayGame"
-    );
-
-    localStorage.removeItem(
-        "duoplayRoomId"
-    );
-
-
-    window.location.href =
-        "/games.html";
-
-}
-
-
-leaveBtn.onclick =
-    leaveGame;
-
-
-backBtn.onclick =
-    leaveGame;
-
-
-/* =====================================================
-   TOAST
-===================================================== */
-
-function showToast(
-    message
-) {
-
-    toast.textContent =
-        message;
-
-    toast.classList.add(
-        "show"
-    );
-
-
-    setTimeout(
-        () => {
-
-            toast.classList.remove(
-                "show"
+        const element =
+            document.querySelector(
+                `[data-square="${move.to}"]`
             );
 
-        },
-        2200
-    );
+        if (!element) {
+            return;
+        }
 
+        if (move.captured) {
+            element.classList.add("capture");
+        } else {
+            element.classList.add("legal");
+        }
+    });
 }
 
 
 /* =====================================================
-   START
-===================================================== */
+   MOVE HISTORY
+   ===================================================== */
 
-if (!myPlayerId) {
+let moveNumber = 0;
 
-    status.textContent =
-        "Player ID not found.";
+function addMoveToHistory(move) {
 
+    const currentMove =
+        ++moveNumber;
+
+    if (
+        moveNumber % 2 === 1
+    ) {
+        const row =
+            document.createElement("div");
+
+        row.id =
+            "move-" + currentMove;
+
+        row.textContent =
+            Math.ceil(moveNumber / 2) +
+            ". " +
+            move.san;
+
+        moveHistory.appendChild(row);
+
+    } else {
+
+        const rows =
+            moveHistory.children;
+
+        if (rows.length > 0) {
+
+            rows[rows.length - 1].textContent +=
+                "   " + move.san;
+        }
+    }
+
+    moveHistory.scrollTop =
+        moveHistory.scrollHeight;
 }
-else if (!gameData) {
 
-    status.textContent =
-        "No active Chess game.";
 
+/* =====================================================
+   GAME END
+   ===================================================== */
+
+function checkGameEnd() {
+
+    if (chess.isCheckmate()) {
+
+        const winner =
+            chess.turn() === "w"
+                ? "black"
+                : "white";
+
+        statusText.textContent =
+            winner === myColor
+                ? "You won!"
+                : "You lost.";
+
+        socket.emit(
+            "chess-game-finished",
+            {
+                gameId,
+                winner
+            }
+        );
+
+        return;
+    }
+
+    if (chess.isDraw()) {
+
+        statusText.textContent =
+            "Game drawn.";
+
+        socket.emit(
+            "chess-game-finished",
+            {
+                gameId,
+                winner: "draw"
+            }
+        );
+    }
 }
-else {
 
-    initializeGame(
-        gameData
+
+/* =====================================================
+   SERVER ERRORS
+   ===================================================== */
+
+socket.on("chess-game-error", (data) => {
+
+    console.error(
+        "Chess game error:",
+        data
     );
 
+    statusText.textContent =
+        data && data.message
+            ? data.message
+            : "Chess game error.";
+
+    statusText.className =
+        "card-value status error";
+});
+
+
+socket.on("chess-move-error", (data) => {
+
+    statusText.textContent =
+        data && data.message
+            ? data.message
+            : "Move rejected.";
+
+});
+
+
+socket.on("error-message", (message) => {
+
+    console.error(message);
+
+    statusText.textContent =
+        message || "Server error.";
+
+});
+
+
+/* =====================================================
+   BACK TO GAME ROOM
+   ===================================================== */
+
+function goBack() {
+
+    window.location.href =
+        "games.html";
+}
+
+
+/* =====================================================
+   INITIAL STATE
+   ===================================================== */
+
+document.getElementById("myName").textContent =
+    playerId
+        ? "You • " + playerId
+        : "You";
+
+renderBoard();
+
+if (socket.connected) {
+    tryRecoverGame();
 }
 
 </script>
