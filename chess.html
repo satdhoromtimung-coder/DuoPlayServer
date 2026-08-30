@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DuoPlay Chess</title>
+
+<title>DuoPlay - Chess</title>
 
 <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/1.4.0/chess.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
 <style>
 * {
@@ -16,334 +17,290 @@
 html,
 body {
     margin: 0;
-    width: 100%;
     min-height: 100%;
     font-family: Arial, sans-serif;
-    color: white;
 }
 
 body {
     min-height: 100vh;
-    overflow-x: hidden;
+    color: white;
+
     background:
         linear-gradient(
-            rgba(100, 160, 135, 0.35),
-            rgba(10, 70, 50, 0.65)
+            rgba(8, 45, 35, 0.18),
+            rgba(8, 45, 35, 0.55)
         ),
         linear-gradient(
             180deg,
-            #a8ddd2 0%,
-            #82b79c 48%,
-            #356e52 49%,
-            #174b38 100%
+            #b8e4d8 0%,
+            #8fc5aa 45%,
+            #467b5c 72%,
+            #164633 100%
         );
-    position: relative;
 }
 
-/* Mountain background */
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    bottom: 16%;
-    width: 0;
-    height: 0;
-    border-left: 180px solid transparent;
-    border-right: 180px solid transparent;
-    border-bottom: 310px solid rgba(40, 90, 75, 0.48);
-    z-index: 0;
-}
-
-body::before {
-    left: -100px;
-}
-
-body::after {
-    right: -100px;
-    border-bottom-color: rgba(35, 85, 68, 0.42);
-}
-
-/* Header */
 .header {
-    height: 62px;
+    height: 64px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 28px;
-    background: rgba(7, 35, 29, 0.72);
-    border-bottom: 1px solid rgba(255,255,255,0.15);
-    position: relative;
-    z-index: 5;
+    background: rgba(4, 35, 28, 0.76);
+    border-bottom: 1px solid rgba(255,255,255,0.12);
 }
 
 .logo {
-    font-size: 30px;
+    font-size: 28px;
     font-weight: 800;
-    letter-spacing: -1px;
-    color: #fff4c9;
+    color: #fff0b5;
 }
 
 .connection {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 15px;
+    font-size: 14px;
 }
 
-.dot {
+.connection-dot {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: #f2bd57;
+    background: #d9534f;
 }
 
-.dot.connected {
-    background: #36d477;
+.connection-dot.connected {
+    background: #35d47a;
 }
 
-/* Main */
-.main {
-    position: relative;
-    z-index: 2;
-    width: min(1200px, 96%);
-    margin: 22px auto 40px;
+.page {
+    width: min(850px, 95%);
+    margin: 25px auto 40px;
 }
 
-.topbar {
+.game-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 14px;
+    margin-bottom: 15px;
+    gap: 10px;
 }
 
-.game-title {
-    font-size: 27px;
+.player-box {
+    padding: 12px 16px;
+    border-radius: 13px;
+    background: rgba(4, 45, 35, 0.78);
+}
+
+.player-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 4px;
+}
+
+.player-id {
     font-weight: 800;
 }
 
-.back-btn {
-    border: 0;
-    border-radius: 22px;
-    padding: 11px 20px;
-    color: white;
-    background: rgba(7, 50, 40, 0.75);
-    cursor: pointer;
-    font-size: 15px;
+.turn {
+    padding: 10px 15px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.10);
+    font-weight: 700;
+    text-align: center;
 }
 
-.back-btn:hover {
-    background: rgba(7, 50, 40, 0.95);
-}
-
-/* Layout */
-.game-layout {
-    display: grid;
-    grid-template-columns: minmax(500px, 760px) 290px;
-    gap: 22px;
+.board-wrap {
+    display: flex;
     justify-content: center;
 }
 
-/* Board panel */
-.board-panel {
-    background: rgba(5, 57, 45, 0.90);
-    border-radius: 26px;
-    padding: 22px;
-    box-shadow: 0 18px 45px rgba(0,0,0,0.28);
-}
+.board {
+    width: min(82vw, 680px);
+    height: min(82vw, 680px);
 
-.player-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 13px;
-    padding: 8px 12px;
-}
-
-.player-name {
-    font-size: 18px;
-    font-weight: 700;
-}
-
-.player-color {
-    color: #ffdf88;
-    font-size: 13px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-}
-
-/* Chess board */
-#board {
-    width: min(100%, 700px);
-    aspect-ratio: 1 / 1;
-    margin: auto;
     display: grid;
+
     grid-template-columns: repeat(8, 1fr);
-    border: 6px solid #073b2e;
-    border-radius: 15px;
+    grid-template-rows: repeat(8, 1fr);
+
+    border: 7px solid #123c2e;
+    border-radius: 10px;
     overflow: hidden;
-    box-shadow:
-        0 12px 30px rgba(0,0,0,0.35),
-        0 0 0 2px rgba(255,220,140,0.35);
+
+    box-shadow: 0 20px 55px rgba(0,0,0,0.35);
 }
 
 .square {
     position: relative;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     cursor: pointer;
     user-select: none;
-    aspect-ratio: 1 / 1;
 }
 
-.light {
-    background: #f1ddb4;
+.square.light {
+    background: #e7d5ad;
 }
 
-.dark {
-    background: #b88d67;
+.square.dark {
+    background: #77966d;
 }
 
 .square.selected {
-    box-shadow: inset 0 0 0 5px rgba(255, 215, 74, 0.9);
+    box-shadow: inset 0 0 0 5px #f2c94c;
 }
 
-.square.legal::after {
+.square.possible {
+    box-shadow: inset 0 0 0 4px rgba(242,201,76,0.65);
+}
+
+.square.possible::after {
     content: "";
+
     width: 22%;
     height: 22%;
-    border-radius: 50%;
-    background: rgba(30, 100, 70, 0.55);
-    position: absolute;
-}
 
-.square.capture::after {
-    content: "";
-    position: absolute;
-    width: 78%;
-    height: 78%;
     border-radius: 50%;
-    border: 5px solid rgba(180, 55, 45, 0.55);
+
+    background: rgba(0,0,0,0.25);
+
+    position: absolute;
 }
 
 .piece {
-    font-size: clamp(34px, 6vw, 68px);
-    line-height: 1;
     position: relative;
     z-index: 2;
-    text-shadow:
-        1px 2px 2px rgba(0,0,0,0.55);
+
+    font-size: clamp(30px, 7vw, 65px);
+    line-height: 1;
+
+    cursor: pointer;
+
+    text-shadow: 1px 2px 2px rgba(0,0,0,0.35);
 }
 
-.white-piece {
-    color: #fff8e8;
-}
-
-.black-piece {
-    color: #29251f;
-}
-
-/* Side panel */
-.side {
+.controls {
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
 }
 
-.card {
-    background: rgba(5, 57, 45, 0.90);
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 12px 28px rgba(0,0,0,0.20);
-}
+.control-button {
+    border: 0;
 
-.card-label {
-    color: #f4cf75;
-    font-size: 12px;
+    padding: 12px 20px;
+
+    border-radius: 12px;
+
+    background: #e5b957;
+    color: #17392e;
+
     font-weight: 800;
-    letter-spacing: 3px;
-    margin-bottom: 9px;
+    cursor: pointer;
 }
 
-.card-value {
-    font-size: 20px;
-    font-weight: 700;
+.control-button:hover {
+    filter: brightness(1.08);
 }
 
-.status {
-    min-height: 45px;
-    line-height: 1.4;
+.control-button.secondary {
+    background: rgba(255,255,255,0.12);
+    color: white;
 }
 
-.last-move {
-    min-height: 25px;
-    color: #f6dfab;
+.message {
+    text-align: center;
+    margin-top: 15px;
+    min-height: 22px;
+    color: rgba(255,255,255,0.82);
 }
 
-.moves {
-    max-height: 180px;
-    overflow-y: auto;
-    color: #e7e0cc;
-    font-size: 14px;
-    line-height: 1.8;
+.overlay {
+    position: fixed;
+    inset: 0;
+
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(0,0,0,0.55);
+
+    z-index: 50;
 }
 
-.waiting {
-    color: #f5d57b;
+.overlay.show {
+    display: flex;
 }
 
-.success {
-    color: #55e391;
+.result-box {
+    width: min(380px, 100%);
+
+    padding: 30px;
+
+    text-align: center;
+
+    border-radius: 22px;
+
+    background: linear-gradient(
+        145deg,
+        #174f3e,
+        #082e24
+    );
+
+    box-shadow: 0 25px 70px rgba(0,0,0,0.45);
 }
 
-.error {
-    color: #ff8f8f;
+.result-title {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 10px;
 }
 
-.turn-active {
-    color: #55e391;
-}
-
-/* Responsive */
-@media (max-width: 900px) {
-    .game-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .side {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .board-panel {
-        padding: 12px;
-    }
+.result-text {
+    color: #dcebe4;
+    margin-bottom: 25px;
 }
 
 @media (max-width: 600px) {
+
     .header {
         padding: 0 15px;
     }
 
     .logo {
-        font-size: 24px;
+        font-size: 23px;
     }
 
-    .game-title {
-        font-size: 22px;
+    .page {
+        width: 97%;
+        margin-top: 15px;
     }
 
-    .main {
-        width: 98%;
-        margin-top: 12px;
+    .game-info {
+        gap: 8px;
     }
 
-    .side {
-        grid-template-columns: 1fr;
+    .player-box {
+        padding: 9px 11px;
     }
 
-    .piece {
-        font-size: 10vw;
+    .turn {
+        padding: 9px 10px;
+        font-size: 13px;
+    }
+
+    .board {
+        width: 96vw;
+        height: 96vw;
+        border-width: 4px;
     }
 }
 </style>
@@ -352,351 +309,338 @@ body::after {
 <body>
 
 <header class="header">
-    <div class="logo">DuoPlay</div>
+
+    <div class="logo">
+        DuoPlay
+    </div>
 
     <div class="connection">
-        <span class="dot" id="connectionDot"></span>
-        <span id="connectionText">Connecting...</span>
+
+        <span
+            id="connectionDot"
+            class="connection-dot">
+        </span>
+
+        <span id="connectionText">
+            Connecting...
+        </span>
+
     </div>
+
 </header>
 
-<main class="main">
 
-    <div class="topbar">
-        <div class="game-title">Chess</div>
+<main class="page">
 
-        <button class="back-btn" onclick="goBack()">
-            ← Game Room
-        </button>
+    <div class="game-info">
+
+        <div class="player-box">
+
+            <div class="player-label">
+                You
+            </div>
+
+            <div
+                id="myId"
+                class="player-id">
+                —
+            </div>
+
+        </div>
+
+
+        <div
+            id="turnText"
+            class="turn">
+            Waiting...
+        </div>
+
+
+        <div class="player-box">
+
+            <div class="player-label">
+                Opponent
+            </div>
+
+            <div
+                id="opponentId"
+                class="player-id">
+                —
+            </div>
+
+        </div>
+
     </div>
 
-    <div class="game-layout">
 
-        <section class="board-panel">
+    <div class="board-wrap">
 
-            <div class="player-bar">
-                <div class="player-name" id="opponentName">
-                    Opponent
-                </div>
+        <div
+            id="board"
+            class="board">
+        </div>
 
-                <div class="player-color" id="opponentColor">
-                    Waiting
-                </div>
-            </div>
+    </div>
 
-            <div id="board"></div>
 
-            <div class="player-bar">
-                <div class="player-name" id="myName">
-                    You
-                </div>
+    <div class="controls">
 
-                <div class="player-color" id="myColor">
-                    Waiting
-                </div>
-            </div>
+        <button
+            class="control-button secondary"
+            onclick="leaveGame()">
 
-        </section>
+            Leave Game
 
-        <aside class="side">
+        </button>
 
-            <div class="card">
-                <div class="card-label">YOUR COLOR</div>
-                <div class="card-value" id="colorText">
-                    Waiting...
-                </div>
-            </div>
+    </div>
 
-            <div class="card">
-                <div class="card-label">TURN</div>
-                <div class="card-value" id="turnText">
-                    Waiting...
-                </div>
-            </div>
 
-            <div class="card">
-                <div class="card-label">STATUS</div>
-                <div class="card-value status" id="statusText">
-                    Connecting to DuoPlay...
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-label">LAST ACTION</div>
-                <div class="card-value last-move" id="lastMove">
-                    Waiting...
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-label">MOVE HISTORY</div>
-                <div class="moves" id="moveHistory">
-                    No moves yet.
-                </div>
-            </div>
-
-        </aside>
-
+    <div
+        id="message"
+        class="message">
+        Connecting to Chess...
     </div>
 
 </main>
 
+
+<div
+    id="resultOverlay"
+    class="overlay">
+
+    <div class="result-box">
+
+        <div
+            id="resultTitle"
+            class="result-title">
+            Game Over
+        </div>
+
+        <div
+            id="resultText"
+            class="result-text">
+        </div>
+
+        <button
+            class="control-button"
+            onclick="goGames()">
+
+            Back to Games
+
+        </button>
+
+    </div>
+
+</div>
+
+
 <script>
-/* =====================================================
-   DUOPLAY CHESS CLIENT
-   ===================================================== */
 
-const SERVER_URL = "https://duoplayserver.onrender.com";
-
-const socket = io(SERVER_URL, {
-    transports: ["websocket", "polling"]
-});
-
-let chess = new Chess();
-
-let playerId =
-    localStorage.getItem("duoplay_player_id");
-
-let gameId = null;
-let myColor = null;
-let opponentId = null;
-
-let selectedSquare = null;
-let gameStarted = false;
+const SERVER_URL =
+    "https://duoplayserver.onrender.com";
 
 
-/* =====================================================
-   ELEMENTS
-   ===================================================== */
+const socket =
+    io(SERVER_URL, {
+        transports: [
+            "websocket",
+            "polling"
+        ]
+    });
+
+
+const game =
+    new Chess();
+
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+let gameId =
+    params.get("gameId") ||
+    sessionStorage.getItem(
+        "duoplay_game_id"
+    );
+
+
+let myColor =
+    params.get("color") ||
+    sessionStorage.getItem(
+        "duoplay_game_color"
+    );
+
+
+let myId =
+    localStorage.getItem(
+        "duoplay_player_id"
+    );
+
+
+let opponentId =
+    sessionStorage.getItem(
+        "duoplay_opponent_id"
+    );
+
 
 const boardElement =
-    document.getElementById("board");
+    document.getElementById(
+        "board"
+    );
 
-const statusText =
-    document.getElementById("statusText");
+const myIdElement =
+    document.getElementById(
+        "myId"
+    );
 
-const colorText =
-    document.getElementById("colorText");
+const opponentIdElement =
+    document.getElementById(
+        "opponentId"
+    );
 
-const turnText =
-    document.getElementById("turnText");
+const turnTextElement =
+    document.getElementById(
+        "turnText"
+    );
 
-const lastMove =
-    document.getElementById("lastMove");
-
-const moveHistory =
-    document.getElementById("moveHistory");
-
-const myColorElement =
-    document.getElementById("myColor");
-
-const opponentColorElement =
-    document.getElementById("opponentColor");
-
-const connectionText =
-    document.getElementById("connectionText");
+const messageElement =
+    document.getElementById(
+        "message"
+    );
 
 const connectionDot =
-    document.getElementById("connectionDot");
-
-
-/* =====================================================
-   CONNECTION
-   ===================================================== */
-
-socket.on("connect", () => {
-
-    connectionText.textContent = "Connected";
-    connectionDot.classList.add("connected");
-
-    statusText.textContent =
-        "Connected to DuoPlay.";
-
-    /*
-       Register the SAME player ID.
-
-       If localStorage already contains the ID,
-       the server restores that player.
-    */
-
-    socket.emit(
-        "register-player",
-        playerId || null
-    );
-});
-
-
-socket.on("disconnect", () => {
-
-    connectionText.textContent =
-        "Disconnected";
-
-    connectionDot.classList.remove("connected");
-
-    statusText.textContent =
-        "Connection lost. Reconnecting...";
-
-});
-
-
-socket.on("connect_error", () => {
-
-    connectionText.textContent =
-        "Connection error";
-
-    connectionDot.classList.remove("connected");
-
-    statusText.textContent =
-        "Could not connect to DuoPlay.";
-
-});
-
-
-/* =====================================================
-   PLAYER REGISTERED
-   ===================================================== */
-
-socket.on("player-registered", (data) => {
-
-    if (!data || !data.playerId) {
-        return;
-    }
-
-    playerId = data.playerId;
-
-    /*
-       VERY IMPORTANT:
-
-       Save the ID permanently in this browser.
-       Refreshing does NOT generate another ID.
-    */
-
-    localStorage.setItem(
-        "duoplay_player_id",
-        playerId
+    document.getElementById(
+        "connectionDot"
     );
 
-    document.getElementById("myName").textContent =
-        "You • " + playerId;
-
-    tryRecoverGame();
-});
-
-
-/* =====================================================
-   CHESS GAME START
-   ===================================================== */
-
-socket.on("chess-game-start", (data) => {
-
-    console.log("Chess game started:", data);
-
-    if (!data || !data.gameId) {
-        return;
-    }
-
-    gameId = data.gameId;
-    myColor = data.color;
-    opponentId = data.opponentId;
-
-    /*
-       Store the game information.
-
-       This is important if the page is refreshed.
-    */
-
-    sessionStorage.setItem(
-        "duoplay_game_id",
-        gameId
+const connectionText =
+    document.getElementById(
+        "connectionText"
     );
 
-    sessionStorage.setItem(
-        "duoplay_game_color",
-        myColor
+const resultOverlay =
+    document.getElementById(
+        "resultOverlay"
     );
 
-    sessionStorage.setItem(
-        "duoplay_opponent_id",
-        opponentId
+const resultTitle =
+    document.getElementById(
+        "resultTitle"
     );
 
-    startGame();
-});
+const resultTextElement =
+    document.getElementById(
+        "resultText"
+    );
 
 
-/* =====================================================
-   CHESS GAME JOINED
-   ===================================================== */
-
-socket.on("chess-game-joined", (data) => {
-
-    console.log("Joined chess game:", data);
-
-    if (!data || !data.gameId) {
-        return;
-    }
-
-    gameId = data.gameId;
-    myColor = data.color;
-    opponentId = data.opponentId;
-
-    startGame();
-});
+let selectedSquare = null;
+let gameFinished = false;
 
 
-/* =====================================================
-   RECOVER GAME
-   ===================================================== */
+myIdElement.textContent =
+    myId || "Unknown";
 
-function tryRecoverGame() {
+opponentIdElement.textContent =
+    opponentId || "Opponent";
 
-    const savedGame =
-        sessionStorage.getItem("duoplay_game_id");
 
-    const savedColor =
-        sessionStorage.getItem("duoplay_game_color");
+socket.on(
+    "connect",
+    () => {
 
-    const savedOpponent =
-        sessionStorage.getItem("duoplay_opponent_id");
+        connectionText.textContent =
+            "Connected";
 
-    /*
-       If games.html already saved the game information,
-       use it.
-    */
-
-    if (savedGame) {
-
-        gameId = savedGame;
-        myColor = savedColor;
-        opponentId = savedOpponent;
-
-        socket.emit(
-            "join-chess-game",
-            gameId
+        connectionDot.classList.add(
+            "connected"
         );
 
-        return;
+
+        socket.emit(
+            "register-player",
+            myId || null
+        );
+
     }
+);
 
-    /*
-       Also support URL:
 
-       chess.html?gameId=xxxxx&color=white
-    */
+socket.on(
+    "disconnect",
+    () => {
 
-    const params =
-        new URLSearchParams(window.location.search);
+        connectionText.textContent =
+            "Disconnected";
 
-    const urlGameId =
-        params.get("gameId");
+        connectionDot.classList.remove(
+            "connected"
+        );
 
-    const urlColor =
-        params.get("color");
+    }
+);
 
-    if (urlGameId) {
 
-        gameId = urlGameId;
-        myColor = urlColor || "white";
+socket.on(
+    "player-registered",
+    (data) => {
+
+        if (
+            !data ||
+            !data.playerId
+        ) {
+            return;
+        }
+
+
+        myId =
+            data.playerId;
+
+
+        localStorage.setItem(
+            "duoplay_player_id",
+            myId
+        );
+
+
+        myIdElement.textContent =
+            myId;
+
+
+        if (gameId) {
+
+            socket.emit(
+                "join-chess-game",
+                gameId
+            );
+
+        }
+
+    }
+);
+
+
+socket.on(
+    "chess-game-start",
+    (data) => {
+
+        if (
+            !data ||
+            !data.gameId
+        ) {
+            return;
+        }
+
+
+        gameId =
+            data.gameId;
+
+        myColor =
+            data.color;
+
 
         sessionStorage.setItem(
             "duoplay_game_id",
@@ -708,186 +652,223 @@ function tryRecoverGame() {
             myColor
         );
 
-        socket.emit(
-            "join-chess-game",
-            gameId
+        sessionStorage.setItem(
+            "duoplay_opponent_id",
+            data.opponentId
         );
 
-        return;
+
+        opponentIdElement.textContent =
+            data.opponentId;
+
+
+        updateTurn(
+            data.turn
+        );
+
+
+        renderBoard();
+
     }
-
-    /*
-       Do NOT immediately say that the player is not
-       in a game while the socket is still connecting.
-    */
-
-    statusText.textContent =
-        "Waiting for chess game...";
-}
+);
 
 
-/* =====================================================
-   START GAME
-   ===================================================== */
+socket.on(
+    "chess-game-joined",
+    (data) => {
 
-function startGame() {
+        if (!data) {
+            return;
+        }
 
-    if (!gameId || !myColor) {
-        statusText.textContent =
-            "Waiting for chess game...";
-        return;
+
+        if (data.gameId) {
+            gameId =
+                data.gameId;
+        }
+
+
+        if (data.color) {
+            myColor =
+                data.color;
+        }
+
+
+        if (data.opponentId) {
+
+            opponentIdElement.textContent =
+                data.opponentId;
+
+        }
+
+
+        game.reset();
+
+
+        if (
+            Array.isArray(
+                data.moves
+            )
+        ) {
+
+            data.moves.forEach(
+                move => {
+
+                    try {
+
+                        game.move(
+                            move
+                        );
+
+                    } catch (error) {
+
+                        console.error(
+                            "Move restore error:",
+                            error
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        updateTurn(
+            data.turn
+        );
+
+
+        renderBoard();
+
+
+        showMessage(
+            "Chess game connected."
+        );
+
     }
+);
 
-    gameStarted = true;
-
-    chess = new Chess();
-
-    selectedSquare = null;
-
-    document.getElementById("myName").textContent =
-        "You • " + playerId;
-
-    document.getElementById("opponentName").textContent =
-        "Opponent • " + (opponentId || "Player");
-
-    myColorElement.textContent =
-        myColor;
-
-    opponentColorElement.textContent =
-        myColor === "white"
-            ? "black"
-            : "white";
-
-    colorText.textContent =
-        myColor.toUpperCase();
-
-    statusText.textContent =
-        "Chess game started.";
-
-    statusText.className =
-        "card-value status success";
-
-    renderBoard();
-
-    updateTurn();
-
-    socket.emit(
-        "join-chess-game",
-        gameId
-    );
-}
-
-
-/* =====================================================
-   DRAW BOARD
-   ===================================================== */
 
 function renderBoard() {
 
-    boardElement.innerHTML = "";
+    boardElement.innerHTML =
+        "";
+
 
     const board =
-        chess.board();
+        game.board();
 
-    let rows = board;
 
-    /*
-       Black player sees the board from black's side.
-    */
+    let rows =
+        [...Array(8).keys()];
 
-    if (myColor === "black") {
-        rows = [...board]
-            .reverse()
-            .map(row => [...row].reverse());
+    let cols =
+        [...Array(8).keys()];
+
+
+    if (
+        myColor ===
+        "black"
+    ) {
+
+        rows.reverse();
+        cols.reverse();
+
     }
 
-    rows.forEach((row, rowIndex) => {
 
-        row.forEach((piece, colIndex) => {
+    rows.forEach(
+        row => {
 
-            const square =
-                document.createElement("div");
+            cols.forEach(
+                col => {
 
-            const actualRow =
-                myColor === "black"
-                    ? 7 - rowIndex
-                    : rowIndex;
+                    const square =
+                        document.createElement(
+                            "div"
+                        );
 
-            const actualCol =
-                myColor === "black"
-                    ? 7 - colIndex
-                    : colIndex;
 
-            const file =
-                String.fromCharCode(
-                    97 + actualCol
-                );
+                    square.className =
+                        "square " +
+                        (
+                            (row + col) % 2 === 0
+                                ? "light"
+                                : "dark"
+                        );
 
-            const rank =
-                8 - actualRow;
 
-            const squareName =
-                file + rank;
+                    const squareName =
+                        String.fromCharCode(
+                            97 + col
+                        ) +
+                        (8 - row);
 
-            square.className =
-                "square " +
-                (
-                    (actualRow + actualCol) % 2 === 0
-                        ? "light"
-                        : "dark"
-                );
 
-            square.dataset.square =
-                squareName;
+                    square.dataset.square =
+                        squareName;
 
-            if (selectedSquare === squareName) {
-                square.classList.add("selected");
-            }
 
-            if (piece) {
+                    const piece =
+                        board[row][col];
 
-                const pieceElement =
-                    document.createElement("div");
 
-                pieceElement.className =
-                    "piece " +
-                    (
-                        piece.color === "w"
-                            ? "white-piece"
-                            : "black-piece"
+                    if (piece) {
+
+                        const pieceElement =
+                            document.createElement(
+                                "span"
+                            );
+
+
+                        pieceElement.className =
+                            "piece";
+
+
+                        pieceElement.textContent =
+                            getPieceSymbol(
+                                piece
+                            );
+
+
+                        square.appendChild(
+                            pieceElement
+                        );
+
+                    }
+
+
+                    square.addEventListener(
+                        "click",
+                        () => handleSquareClick(
+                            squareName
+                        )
                     );
 
-                pieceElement.textContent =
-                    getPieceSymbol(
-                        piece.color,
-                        piece.type
+
+                    boardElement.appendChild(
+                        square
                     );
 
-                square.appendChild(
-                    pieceElement
-                );
-            }
-
-            square.addEventListener(
-                "click",
-                () => handleSquareClick(squareName)
+                }
             );
 
-            boardElement.appendChild(square);
-        });
-    });
+        }
+    );
 
-    showLegalMoves();
+
+    highlightSelected();
+
 }
 
 
-/* =====================================================
-   CHESS PIECES
-   ===================================================== */
+function getPieceSymbol(
+    piece
+) {
 
-function getPieceSymbol(color, type) {
-
-    const pieces = {
+    const symbols = {
 
         w: {
             p: "♙",
@@ -906,78 +887,104 @@ function getPieceSymbol(color, type) {
             q: "♛",
             k: "♚"
         }
+
     };
 
-    return pieces[color][type];
+
+    return symbols[
+        piece.color
+    ][
+        piece.type
+    ];
+
 }
 
 
-/* =====================================================
-   CLICK SQUARE
-   ===================================================== */
+function handleSquareClick(
+    square
+) {
 
-function handleSquareClick(square) {
-
-    if (!gameStarted) {
+    if (gameFinished) {
         return;
     }
+
 
     if (!myColor) {
+
+        showMessage(
+            "Waiting for Chess connection..."
+        );
+
         return;
     }
 
+
     const turn =
-        chess.turn() === "w"
+        game.turn() === "w"
             ? "white"
             : "black";
 
-    if (turn !== myColor) {
 
-        statusText.textContent =
-            "Wait for your turn.";
+    if (
+        turn !==
+        myColor
+    ) {
+
+        showMessage(
+            "Wait for your turn."
+        );
 
         return;
     }
 
-    const piece =
-        chess.get(square);
-
-    /*
-       First click: select your own piece.
-    */
 
     if (!selectedSquare) {
+
+        const piece =
+            game.get(square);
+
 
         if (!piece) {
             return;
         }
 
+
+        const pieceColor =
+            piece.color === "w"
+                ? "white"
+                : "black";
+
+
         if (
-            piece.color !==
-            (myColor === "white" ? "w" : "b")
+            pieceColor !==
+            myColor
         ) {
+
+            showMessage(
+                "That is not your piece."
+            );
+
             return;
         }
 
-        selectedSquare = square;
+
+        selectedSquare =
+            square;
+
 
         renderBoard();
 
         return;
     }
 
-
-    /*
-       Clicking another own piece changes selection.
-    */
 
     if (
-        piece &&
-        piece.color ===
-        (myColor === "white" ? "w" : "b")
+        selectedSquare ===
+        square
     ) {
 
-        selectedSquare = square;
+        selectedSquare =
+            null;
 
         renderBoard();
 
@@ -985,358 +992,449 @@ function handleSquareClick(square) {
     }
 
 
-    /*
-       Try the move.
-    */
+    const move = {
+        from:
+            selectedSquare,
 
-    const move = chess.move({
-        from: selectedSquare,
-        to: square,
-        promotion: "q"
-    });
+        to:
+            square,
 
-    if (!move) {
+        promotion:
+            "q"
+    };
 
-        statusText.textContent =
-            "Illegal move.";
 
-        selectedSquare = null;
+    let result;
 
-        renderBoard();
 
-        return;
+    try {
+
+        result =
+            game.move(
+                move
+            );
+
+    } catch (error) {
+
+        result = null;
+
     }
 
 
-    selectedSquare = null;
+    if (!result) {
 
-    renderBoard();
-
-    updateTurn();
-
-    addMoveToHistory(move);
-
-    lastMove.textContent =
-        move.san;
+        const clickedPiece =
+            game.get(square);
 
 
-    /*
-       Send move to opponent.
-    */
+        if (
+            clickedPiece &&
+            clickedPiece.color ===
+            (
+                myColor === "white"
+                    ? "w"
+                    : "b"
+            )
+        ) {
 
-    socket.emit("chess-move", {
-        gameId,
-        move: {
-            from: move.from,
-            to: move.to,
-            promotion: move.promotion
+            selectedSquare =
+                square;
+
+            renderBoard();
+
+            return;
         }
-    });
 
 
-    checkGameEnd();
-}
-
-
-/* =====================================================
-   OPPONENT MOVE
-   ===================================================== */
-
-socket.on("opponent-move", (data) => {
-
-    if (!data || !data.move) {
-        return;
-    }
-
-    if (!gameId) {
-        return;
-    }
-
-    const move = chess.move({
-        from: data.move.from,
-        to: data.move.to,
-        promotion: data.move.promotion || "q"
-    });
-
-    if (!move) {
-
-        console.error(
-            "Opponent move could not be applied."
+        showMessage(
+            "Illegal Chess move."
         );
 
         return;
     }
 
-    selectedSquare = null;
+
+    selectedSquare =
+        null;
+
 
     renderBoard();
 
-    updateTurn();
 
-    addMoveToHistory(move);
-
-    lastMove.textContent =
-        move.san;
-
-    checkGameEnd();
-});
-
-
-/* =====================================================
-   SERVER TURN
-   ===================================================== */
-
-socket.on("chess-turn", (data) => {
-
-    updateTurn();
-});
+    socket.emit(
+        "chess-move",
+        {
+            gameId,
+            move: result
+        }
+    );
 
 
-/* =====================================================
-   UPDATE TURN
-   ===================================================== */
+    checkGameFinished();
 
-function updateTurn() {
-
-    if (!gameStarted) {
-        turnText.textContent =
-            "Waiting...";
-        return;
-    }
-
-    const turn =
-        chess.turn() === "w"
-            ? "white"
-            : "black";
-
-    if (turn === myColor) {
-
-        turnText.textContent =
-            "Your turn";
-
-        turnText.className =
-            "card-value turn-active";
-
-        statusText.textContent =
-            "Your move.";
-
-        statusText.className =
-            "card-value status success";
-
-    } else {
-
-        turnText.textContent =
-            "Opponent's turn";
-
-        turnText.className =
-            "card-value";
-
-        statusText.textContent =
-            "Waiting for opponent.";
-
-        statusText.className =
-            "card-value status";
-    }
 }
 
 
-/* =====================================================
-   LEGAL MOVES
-   ===================================================== */
-
-function showLegalMoves() {
+function highlightSelected() {
 
     if (!selectedSquare) {
         return;
     }
 
-    let moves = [];
 
-    try {
-        moves =
-            chess.moves({
-                square: selectedSquare,
-                verbose: true
-            });
-    } catch (error) {
-        return;
+    const selected =
+        document.querySelector(
+            `[data-square="${selectedSquare}"]`
+        );
+
+
+    if (selected) {
+
+        selected.classList.add(
+            "selected"
+        );
+
     }
 
-    moves.forEach(move => {
+}
 
-        const element =
-            document.querySelector(
-                `[data-square="${move.to}"]`
-            );
 
-        if (!element) {
+socket.on(
+    "opponent-move",
+    (data) => {
+
+        if (
+            !data ||
+            !data.move
+        ) {
             return;
         }
 
-        if (move.captured) {
-            element.classList.add("capture");
-        } else {
-            element.classList.add("legal");
+
+        try {
+
+            game.move(
+                data.move
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Opponent move error:",
+                error
+            );
+
+            return;
         }
-    });
-}
 
 
-/* =====================================================
-   MOVE HISTORY
-   ===================================================== */
+        selectedSquare =
+            null;
 
-let moveNumber = 0;
 
-function addMoveToHistory(move) {
+        renderBoard();
 
-    const currentMove =
-        ++moveNumber;
+        checkGameFinished();
+
+    }
+);
+
+
+socket.on(
+    "chess-turn",
+    (data) => {
+
+        if (!data) {
+            return;
+        }
+
+
+        updateTurn(
+            data.turn
+        );
+
+    }
+);
+
+
+function updateTurn(
+    turn
+) {
+
+    if (!turn) {
+        return;
+    }
+
 
     if (
-        moveNumber % 2 === 1
+        turn ===
+        myColor
     ) {
-        const row =
-            document.createElement("div");
 
-        row.id =
-            "move-" + currentMove;
+        turnTextElement.textContent =
+            "Your turn";
 
-        row.textContent =
-            Math.ceil(moveNumber / 2) +
-            ". " +
-            move.san;
-
-        moveHistory.appendChild(row);
+        turnTextElement.style.color =
+            "#f2d276";
 
     } else {
 
-        const rows =
-            moveHistory.children;
+        turnTextElement.textContent =
+            "Opponent's turn";
 
-        if (rows.length > 0) {
+        turnTextElement.style.color =
+            "#ffffff";
 
-            rows[rows.length - 1].textContent +=
-                "   " + move.san;
-        }
     }
 
-    moveHistory.scrollTop =
-        moveHistory.scrollHeight;
 }
 
 
-/* =====================================================
-   GAME END
-   ===================================================== */
+function checkGameFinished() {
 
-function checkGameEnd() {
+    if (gameFinished) {
+        return;
+    }
 
-    if (chess.isCheckmate()) {
+
+    if (
+        game.isCheckmate()
+    ) {
+
+        gameFinished =
+            true;
+
 
         const winner =
-            chess.turn() === "w"
+            game.turn() === "w"
                 ? "black"
                 : "white";
 
-        statusText.textContent =
-            winner === myColor
-                ? "You won!"
-                : "You lost.";
 
-        socket.emit(
-            "chess-game-finished",
-            {
-                gameId,
-                winner
-            }
+        finishGame(
+            winner
         );
 
         return;
     }
 
-    if (chess.isDraw()) {
 
-        statusText.textContent =
-            "Game drawn.";
+    if (
+        game.isDraw() ||
+        game.isStalemate() ||
+        game.isThreefoldRepetition() ||
+        game.isInsufficientMaterial()
+    ) {
 
-        socket.emit(
-            "chess-game-finished",
-            {
-                gameId,
-                winner: "draw"
-            }
+        gameFinished =
+            true;
+
+
+        finishGame(
+            "draw"
         );
+
     }
+
 }
 
 
-/* =====================================================
-   SERVER ERRORS
-   ===================================================== */
+function finishGame(
+    winner
+) {
 
-socket.on("chess-game-error", (data) => {
+    if (
+        winner ===
+        "draw"
+    ) {
 
-    console.error(
-        "Chess game error:",
-        data
+        resultTitle.textContent =
+            "Draw";
+
+        resultTextElement.textContent =
+            "The Chess game ended in a draw.";
+
+    } else {
+
+        const iWon =
+            winner ===
+            myColor;
+
+
+        resultTitle.textContent =
+            iWon
+                ? "You Win!"
+                : "You Lose";
+
+
+        resultTextElement.textContent =
+            iWon
+                ? "Congratulations!"
+                : "Your opponent won the game.";
+
+    }
+
+
+    resultOverlay.classList.add(
+        "show"
     );
 
-    statusText.textContent =
-        data && data.message
-            ? data.message
-            : "Chess game error.";
 
-    statusText.className =
-        "card-value status error";
-});
+    socket.emit(
+        "chess-game-finished",
+        {
+            gameId,
+            winner
+        }
+    );
 
-
-socket.on("chess-move-error", (data) => {
-
-    statusText.textContent =
-        data && data.message
-            ? data.message
-            : "Move rejected.";
-
-});
+}
 
 
-socket.on("error-message", (message) => {
+socket.on(
+    "chess-game-finished",
+    () => {
 
-    console.error(message);
-
-    statusText.textContent =
-        message || "Server error.";
-
-});
+        if (gameFinished) {
+            return;
+        }
 
 
-/* =====================================================
-   BACK TO GAME ROOM
-   ===================================================== */
+        gameFinished =
+            true;
 
-function goBack() {
+
+        resultTitle.textContent =
+            "Game Finished";
+
+
+        resultTextElement.textContent =
+            "The Chess game has ended.";
+
+
+        resultOverlay.classList.add(
+            "show"
+        );
+
+    }
+);
+
+
+socket.on(
+    "opponent-left",
+    () => {
+
+        gameFinished =
+            true;
+
+
+        resultTitle.textContent =
+            "Opponent Left";
+
+
+        resultTextElement.textContent =
+            "Your opponent disconnected from the game.";
+
+
+        resultOverlay.classList.add(
+            "show"
+        );
+
+    }
+);
+
+
+socket.on(
+    "chess-game-error",
+    (data) => {
+
+        showMessage(
+            data?.message ||
+            "Chess game error."
+        );
+
+    }
+);
+
+
+socket.on(
+    "connect_error",
+    () => {
+
+        connectionText.textContent =
+            "Server unavailable";
+
+        connectionDot.classList.remove(
+            "connected"
+        );
+
+
+        showMessage(
+            "Could not connect to DuoPlay server."
+        );
+
+    }
+);
+
+
+function leaveGame() {
+
+    socket.emit(
+        "leave-chess-game"
+    );
+
+
+    sessionStorage.removeItem(
+        "duoplay_game_id"
+    );
+
+    sessionStorage.removeItem(
+        "duoplay_game_color"
+    );
+
+    sessionStorage.removeItem(
+        "duoplay_opponent_id"
+    );
+
 
     window.location.href =
         "games.html";
+
 }
 
 
-/* =====================================================
-   INITIAL STATE
-   ===================================================== */
+function goGames() {
 
-document.getElementById("myName").textContent =
-    playerId
-        ? "You • " + playerId
-        : "You";
+    sessionStorage.removeItem(
+        "duoplay_game_id"
+    );
+
+    sessionStorage.removeItem(
+        "duoplay_game_color"
+    );
+
+    sessionStorage.removeItem(
+        "duoplay_opponent_id"
+    );
+
+
+    window.location.href =
+        "games.html";
+
+}
+
+
+function showMessage(
+    text
+) {
+
+    messageElement.textContent =
+        text;
+
+}
+
 
 renderBoard();
-
-if (socket.connected) {
-    tryRecoverGame();
-}
 
 </script>
 

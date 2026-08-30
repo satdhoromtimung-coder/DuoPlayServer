@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>DuoPlay — Games</title>
+<title>DuoPlay - Games</title>
 
 <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 
@@ -17,667 +17,429 @@ html,
 body {
     margin: 0;
     min-height: 100%;
+    font-family: Arial, sans-serif;
 }
 
 body {
     min-height: 100vh;
-    font-family: Arial, sans-serif;
     color: white;
-    overflow-x: hidden;
 
     background:
+        linear-gradient(
+            rgba(8, 45, 35, 0.18),
+            rgba(8, 45, 35, 0.55)
+        ),
         linear-gradient(
             180deg,
-            #79c9c5 0%,
-            #a8ddd0 34%,
-            #709b70 68%,
-            #153d2c 100%
+            #b8e4d8 0%,
+            #8fc5aa 45%,
+            #467b5c 72%,
+            #164633 100%
         );
 }
 
-/* =====================================================
-   BACKGROUND
-===================================================== */
+/* ================= HEADER ================= */
 
-.background {
-    position: fixed;
-    inset: 0;
-    z-index: -10;
-    overflow: hidden;
-}
-
-.sun {
-    position: absolute;
-    width: 140px;
-    height: 140px;
-    top: 7%;
-    right: 9%;
-    border-radius: 50%;
-
-    background:
-        radial-gradient(
-            circle,
-            #fffde3,
-            #ffe8a0 55%,
-            #ffd36d
-        );
-
-    box-shadow:
-        0 0 55px #ffe8a0;
-}
-
-.cloud {
-    position: absolute;
-    width: 190px;
-    height: 45px;
-    border-radius: 50px;
-    background: rgba(255,255,255,.32);
-    animation: cloudMove 50s linear infinite;
-}
-
-.cloud::before,
-.cloud::after {
-    content: "";
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255,255,255,.35);
-}
-
-.cloud::before {
-    width: 80px;
-    height: 80px;
-    left: 25px;
-    bottom: 0;
-}
-
-.cloud::after {
-    width: 62px;
-    height: 62px;
-    right: 25px;
-    bottom: 0;
-}
-
-.cloud.one {
-    top: 15%;
-    left: -230px;
-}
-
-.cloud.two {
-    top: 30%;
-    left: -350px;
-    transform: scale(.7);
-    animation-duration: 65s;
-    animation-delay: -20s;
-}
-
-@keyframes cloudMove {
-    from {
-        margin-left: 0;
-    }
-
-    to {
-        margin-left: calc(100vw + 600px);
-    }
-}
-
-.mountains {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 21%;
-    height: 46%;
-}
-
-.mountain {
-    position: absolute;
-    bottom: 0;
-
-    width: 0;
-    height: 0;
-
-    border-left: 230px solid transparent;
-    border-right: 230px solid transparent;
-    border-bottom: 350px solid #628a80;
-}
-
-.mountain.one {
-    left: -180px;
-}
-
-.mountain.two {
-    left: 17%;
-    transform: scale(.78);
-}
-
-.mountain.three {
-    left: 43%;
-    transform: scale(1.12);
-    border-bottom-color: #547b71;
-}
-
-.mountain.four {
-    left: 72%;
-    transform: scale(.8);
-}
-
-.ground {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 22%;
-
-    background:
-        linear-gradient(
-            to top,
-            #153d2c,
-            rgba(35,100,67,.72)
-        );
-}
-
-/* =====================================================
-   HEADER
-===================================================== */
-
-header {
-    min-height: 72px;
-    padding: 12px 24px;
+.header {
+    height: 64px;
 
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    background: rgba(8,47,37,.16);
-    border-bottom: 1px solid rgba(255,255,255,.12);
+    padding: 0 28px;
+
+    background: rgba(4, 35, 28, 0.76);
+
+    border-bottom:
+        1px solid rgba(255,255,255,0.12);
 }
 
 .logo {
-    font-family: Georgia, serif;
-    font-size: 34px;
-    font-weight: bold;
-    color: #ffe19a;
-
-    text-shadow:
-        0 3px 8px rgba(0,0,0,.25);
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff0b5;
 }
 
-.my-id {
+.status {
     display: flex;
     align-items: center;
-    gap: 9px;
-
-    padding: 10px 15px;
-    border-radius: 25px;
-
-    background: rgba(8,47,37,.62);
-    border: 1px solid rgba(255,255,255,.15);
+    gap: 8px;
 
     font-size: 14px;
 }
 
-.id-label {
-    color: #c7ded6;
-}
-
-#myId {
-    color: #ffe29a;
-    font-weight: bold;
-    font-family: monospace;
-    letter-spacing: 1px;
-}
-
-/* =====================================================
-   MAIN
-===================================================== */
-
-main {
-    width: min(850px, 94%);
-    margin: 42px auto 60px;
-}
-
-.page-title {
-    text-align: center;
-
-    margin: 0;
-
-    font-family: Georgia, serif;
-    font-size: clamp(43px, 7vw, 68px);
-
-    color: #fff1c3;
-
-    text-shadow:
-        0 5px 20px rgba(0,0,0,.22);
-}
-
-.page-subtitle {
-    text-align: center;
-
-    margin:
-        8px 0 32px;
-
-    color: #e1f1eb;
-}
-
-/* =====================================================
-   PLAYERS PANEL
-===================================================== */
-
-.players-panel {
-    padding: 25px;
-
-    border-radius: 26px;
-
-    background: rgba(8,47,37,.78);
-
-    border:
-        1px solid rgba(255,255,255,.15);
-
-    box-shadow:
-        0 25px 60px rgba(0,0,0,.27);
-
-    backdrop-filter: blur(7px);
-}
-
-.panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    margin-bottom: 18px;
-}
-
-.panel-title {
-    color: #ffe5a0;
-
-    font-family: monospace;
-    font-size: 14px;
-    letter-spacing: 2px;
-}
-
-.online-count {
-    padding: 6px 11px;
-
-    border-radius: 15px;
-
-    background: rgba(255,255,255,.08);
-
-    color: #dcece6;
-
-    font-size: 13px;
-}
-
-/* =====================================================
-   PLAYER LIST
-===================================================== */
-
-.player-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.player-row {
-    min-height: 64px;
-
-    display: flex;
-    align-items: center;
-
-    padding: 9px 11px 9px 16px;
-
-    border-radius: 15px;
-
-    background: rgba(255,255,255,.065);
-
-    border:
-        1px solid rgba(255,255,255,.08);
-
-    transition:
-        background .15s ease,
-        border .15s ease;
-}
-
-.player-row:hover {
-    background: rgba(255,255,255,.10);
-}
-
-.player-row.selected {
-    border-color: rgba(255,226,154,.55);
-
-    background:
-        rgba(255,226,154,.09);
-}
-
-.player-info {
-    flex: 1;
-
-    min-width: 0;
-
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    cursor: pointer;
-}
-
-.online-dot {
+.status-dot {
     width: 10px;
     height: 10px;
 
-    flex: 0 0 auto;
-
     border-radius: 50%;
 
-    background: #61ed9b;
+    background: #e4a94f;
+}
+
+.status-dot.online {
+    background: #35d47a;
+}
+
+/* ================= MAIN ================= */
+
+.main {
+    width: min(1050px, 94%);
+
+    margin: 30px auto;
+}
+
+.title {
+    font-size: 32px;
+    font-weight: 800;
+
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: rgba(255,255,255,0.78);
+
+    margin-bottom: 24px;
+}
+
+/* ================= CHESS CARD ================= */
+
+.chess-card {
+    background: rgba(5, 55, 43, 0.91);
+
+    border-radius: 25px;
+
+    padding: 25px;
 
     box-shadow:
-        0 0 9px #61ed9b;
+        0 18px 45px rgba(0,0,0,0.25);
 }
 
-.player-id {
-    font-family: monospace;
+.chess-top {
+    display: flex;
 
-    font-size: 16px;
+    align-items: center;
+    justify-content: space-between;
 
-    font-weight: bold;
-
-    color: #f0f6f3;
-
-    letter-spacing: 1px;
+    margin-bottom: 25px;
 }
 
-.you {
-    margin-left: 5px;
-
-    color: #b8d8ce;
-
-    font-family: Arial, sans-serif;
-
-    font-size: 12px;
-    font-weight: normal;
+.chess-name {
+    font-size: 25px;
+    font-weight: 800;
 }
 
-/* =====================================================
-   PLAY BUTTON
-===================================================== */
+.chess-description {
+    color: #d9e8df;
+    margin-top: 5px;
+}
 
-.play-btn {
-    display: none;
-
+.play-online {
     border: 0;
 
-    padding: 10px 18px;
+    padding: 12px 20px;
 
-    border-radius: 12px;
+    border-radius: 13px;
+
+    background: #e5b957;
+
+    color: #17392e;
+
+    font-size: 15px;
+    font-weight: 800;
 
     cursor: pointer;
-
-    background:
-        linear-gradient(
-            135deg,
-            #f7d987,
-            #dca84f
-        );
-
-    color: #2c210f;
-
-    font-size: 13px;
-
-    font-weight: bold;
-
-    white-space: nowrap;
 }
 
-.player-row.selected .play-btn {
-    display: block;
-}
-
-.play-btn:hover {
+.play-online:hover {
     filter: brightness(1.08);
 }
 
-.play-btn:disabled {
-    opacity: .6;
-    cursor: not-allowed;
+/* ================= ONLINE ================= */
+
+.online-title {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 14px;
 }
 
-/* =====================================================
-   EMPTY / LOADING
-===================================================== */
+.online-title h2 {
+    margin: 0;
 
-.message {
-    padding: 35px 20px;
+    font-size: 20px;
+}
 
-    text-align: center;
-
-    color: #c9dfd7;
+.online-count {
+    color: #f2d276;
 
     font-size: 14px;
 }
 
-.spinner {
-    width: 25px;
-    height: 25px;
+.players {
+    display: flex;
+    flex-direction: column;
 
-    margin:
-        0 auto 13px;
+    gap: 10px;
+}
+
+.player {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 14px 16px;
+
+    border-radius: 14px;
+
+    background: rgba(255,255,255,0.07);
+
+    border:
+        1px solid rgba(255,255,255,0.08);
+}
+
+.player-left {
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+}
+
+.online-dot {
+    width: 9px;
+    height: 9px;
 
     border-radius: 50%;
 
+    background: #35d47a;
+}
+
+.player-id {
+    font-weight: 700;
+
+    letter-spacing: 0.5px;
+}
+
+.play-button {
+    border: 0;
+
+    padding: 9px 18px;
+
+    border-radius: 10px;
+
+    background: #e5b957;
+
+    color: #17392e;
+
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+.play-button:hover {
+    filter: brightness(1.08);
+}
+
+.play-button:disabled {
+    opacity: 0.45;
+
+    cursor: not-allowed;
+}
+
+/* ================= EMPTY ================= */
+
+.empty {
+    padding: 30px;
+
+    text-align: center;
+
+    color: rgba(255,255,255,0.65);
+
+    background: rgba(255,255,255,0.04);
+
+    border-radius: 15px;
+}
+
+/* ================= MESSAGE ================= */
+
+.message {
+    position: fixed;
+
+    left: 50%;
+    bottom: 25px;
+
+    transform:
+        translateX(-50%)
+        translateY(120px);
+
+    min-width: 260px;
+    max-width: 90%;
+
+    padding: 14px 20px;
+
+    border-radius: 13px;
+
+    background: rgba(4, 30, 24, 0.95);
+
+    box-shadow:
+        0 12px 35px rgba(0,0,0,0.3);
+
+    text-align: center;
+
+    transition:
+        transform 0.25s ease;
+
+    z-index: 100;
+}
+
+.message.show {
+    transform:
+        translateX(-50%)
+        translateY(0);
+}
+
+.message.error {
     border:
-        3px solid rgba(255,255,255,.15);
-
-    border-top-color:
-        #f1cf78;
-
-    animation:
-        spin .8s linear infinite;
+        1px solid rgba(255,100,100,0.4);
 }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
+/* ================= CHALLENGE ================= */
 
-/* =====================================================
-   REQUEST POPUP
-===================================================== */
-
-.request-overlay {
+.challenge-overlay {
     position: fixed;
 
     inset: 0;
-
-    z-index: 100;
 
     display: none;
 
     align-items: center;
     justify-content: center;
 
+    background: rgba(0,0,0,0.55);
+
+    z-index: 200;
+
     padding: 20px;
-
-    background:
-        rgba(0,0,0,.62);
-
-    backdrop-filter: blur(8px);
 }
 
-.request-overlay.show {
+.challenge-overlay.show {
     display: flex;
 }
 
-.request-box {
-    width: min(390px, 100%);
+.challenge-box {
+    width: min(400px, 100%);
 
-    padding: 30px 25px;
+    padding: 30px;
 
-    border-radius: 25px;
-
-    text-align: center;
+    border-radius: 22px;
 
     background:
         linear-gradient(
             145deg,
-            #164b3c,
+            #174f3e,
             #082e24
         );
 
-    border:
-        1px solid rgba(255,255,255,.17);
-
     box-shadow:
-        0 30px 90px rgba(0,0,0,.55);
+        0 25px 70px rgba(0,0,0,0.45);
+
+    text-align: center;
 }
 
-.request-icon {
-    font-size: 52px;
-    margin-bottom: 8px;
+.challenge-title {
+    font-size: 25px;
+
+    font-weight: 800;
+
+    margin-bottom: 10px;
 }
 
-.request-box h2 {
-    margin: 4px 0 8px;
+.challenge-player {
+    font-size: 21px;
 
-    color: #ffe4a0;
+    color: #f2d276;
 
-    font-family: Georgia, serif;
+    font-weight: 800;
+
+    margin: 15px 0 25px;
 }
 
-.request-box p {
-    margin: 0 0 22px;
-
-    color: #c9dfd7;
-
-    line-height: 1.5;
-}
-
-.request-buttons {
+.challenge-buttons {
     display: flex;
-    gap: 10px;
+
+    gap: 12px;
 }
 
-.request-buttons button {
+.challenge-buttons button {
     flex: 1;
-
-    padding: 13px;
 
     border: 0;
 
-    border-radius: 13px;
+    padding: 13px;
+
+    border-radius: 12px;
+
+    font-weight: 800;
 
     cursor: pointer;
-
-    font-weight: bold;
 }
 
-.accept-btn {
-    background:
-        linear-gradient(
-            135deg,
-            #f7d987,
-            #dca84f
-        );
+.accept {
+    background: #e5b957;
 
-    color: #2c210f;
+    color: #17392e;
 }
 
-.decline-btn {
-    background:
-        rgba(255,255,255,.10);
+.reject {
+    background: rgba(255,255,255,0.1);
 
     color: white;
-
-    border:
-        1px solid rgba(255,255,255,.14) !important;
 }
 
-/* =====================================================
-   TOAST
-===================================================== */
+/* ================= RESPONSIVE ================= */
 
-.toast {
-    position: fixed;
+@media (max-width: 650px) {
 
-    left: 50%;
-    bottom: 25px;
-
-    z-index: 200;
-
-    transform:
-        translate(-50%, 30px);
-
-    opacity: 0;
-
-    pointer-events: none;
-
-    padding: 13px 19px;
-
-    border-radius: 13px;
-
-    background:
-        rgba(7,32,26,.95);
-
-    border:
-        1px solid rgba(255,255,255,.15);
-
-    color: white;
-
-    font-size: 14px;
-
-    transition:
-        opacity .2s ease,
-        transform .2s ease;
-}
-
-.toast.show {
-    opacity: 1;
-
-    transform:
-        translate(-50%, 0);
-}
-
-/* =====================================================
-   MOBILE
-===================================================== */
-
-@media(max-width:600px) {
-
-    header {
-        padding: 10px 14px;
+    .header {
+        padding: 0 15px;
     }
 
     .logo {
+        font-size: 23px;
+    }
+
+    .main {
+        width: 96%;
+        margin-top: 20px;
+    }
+
+    .title {
         font-size: 27px;
     }
 
-    .my-id {
-        padding: 8px 11px;
-        font-size: 11px;
+    .chess-top {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 15px;
     }
 
-    main {
-        margin-top: 25px;
+    .play-online {
+        width: 100%;
     }
 
-    .page-title {
-        font-size: 45px;
+    .player {
+        padding: 12px;
     }
 
-    .players-panel {
-        padding: 16px;
-    }
-
-    .player-row {
-        min-height: 60px;
-    }
-
-    .player-id {
-        font-size: 14px;
-    }
-
-    .play-btn {
-        padding: 9px 13px;
-        font-size: 12px;
+    .play-button {
+        padding: 8px 14px;
     }
 }
 </style>
@@ -685,48 +447,20 @@ main {
 
 <body>
 
-<!-- =====================================================
-     BACKGROUND
-===================================================== -->
-
-<div class="background">
-
-    <div class="sun"></div>
-
-    <div class="cloud one"></div>
-    <div class="cloud two"></div>
-
-    <div class="mountains">
-
-        <div class="mountain one"></div>
-        <div class="mountain two"></div>
-        <div class="mountain three"></div>
-        <div class="mountain four"></div>
-
-    </div>
-
-    <div class="ground"></div>
-
-</div>
-
-
-<!-- =====================================================
-     HEADER
-===================================================== -->
-
-<header>
+<header class="header">
 
     <div class="logo">
         DuoPlay
     </div>
 
-    <div class="my-id">
+    <div class="status">
 
-        <span class="id-label">
-            Your ID
+        <span
+            id="statusDot"
+            class="status-dot">
         </span>
 
-        <span id="myId">
+        <span id="statusText">
             Connecting...
         </span>
 
@@ -735,54 +469,67 @@ main {
 </header>
 
 
-<!-- =====================================================
-     MAIN
-===================================================== -->
+<main class="main">
 
-<main>
+    <div class="title">
+        Games
+    </div>
 
-    <h1 class="page-title">
-        Game Room
-    </h1>
-
-    <p class="page-subtitle">
-        Select a player and challenge them to Chess.
-    </p>
+    <div class="subtitle">
+        Choose a player and start a Chess match.
+    </div>
 
 
-    <!-- =================================================
-         PLAYERS
-    ================================================== -->
+    <section class="chess-card">
 
-    <section class="players-panel">
+        <div class="chess-top">
 
-        <div class="panel-header">
+            <div>
 
-            <div class="panel-title">
-                PLAYERS ONLINE
+                <div class="chess-name">
+                    Chess
+                </div>
+
+                <div class="chess-description">
+                    Play Chess against another online player.
+                </div>
+
             </div>
 
+            <button
+                class="play-online"
+                onclick="findPlayer()">
+
+                Find Player
+
+            </button>
+
+        </div>
+
+
+        <div class="online-title">
+
+            <h2>
+                Online Players
+            </h2>
+
             <div
-                id="onlineCount"
                 class="online-count"
-            >
+                id="onlineCount">
+
                 0 online
+
             </div>
 
         </div>
 
 
         <div
-            id="playerList"
-            class="player-list"
-        >
+            class="players"
+            id="players">
 
-            <div class="message">
-
-                <div class="spinner"></div>
-
-                Finding online players...
-
+            <div class="empty">
+                Looking for online players...
             </div>
 
         </div>
@@ -792,46 +539,46 @@ main {
 </main>
 
 
-<!-- =====================================================
-     CHESS REQUEST
-===================================================== -->
+<!-- ================= CHALLENGE POPUP ================= -->
 
 <div
-    id="requestOverlay"
-    class="request-overlay"
->
+    id="challengeOverlay"
+    class="challenge-overlay">
 
-    <div class="request-box">
+    <div class="challenge-box">
 
-        <div class="request-icon">
-            ♟
+        <div class="challenge-title">
+            Chess Challenge
         </div>
 
-        <h2>
-            Chess Challenge
-        </h2>
+        <div>
+            Player
+        </div>
 
-        <p>
-            <strong id="requestPlayer">
-                DP-XXXX
-            </strong>
-            wants to play Chess with you.
-        </p>
+        <div
+            id="challengePlayer"
+            class="challenge-player">
 
-        <div class="request-buttons">
+            DP-000000
+
+        </div>
+
+        <div class="challenge-buttons">
 
             <button
-                id="declineBtn"
-                class="decline-btn"
-            >
-                DECLINE
+                class="reject"
+                onclick="rejectChallenge()">
+
+                Reject
+
             </button>
 
             <button
-                id="acceptBtn"
-                class="accept-btn"
-            >
-                ACCEPT
+                class="accept"
+                onclick="acceptChallenge()">
+
+                Accept
+
             </button>
 
         </div>
@@ -841,337 +588,242 @@ main {
 </div>
 
 
-<!-- =====================================================
-     TOAST
-===================================================== -->
-
 <div
-    id="toast"
-    class="toast"
->
+    id="message"
+    class="message">
 </div>
 
 
 <script>
 
-/* =====================================================
-   SERVER
-===================================================== */
+/* =========================================================
+   CONFIG
+========================================================= */
 
-const SERVER =
-    window.location.origin;
-
-
-/* =====================================================
-   PERMANENT PLAYER ID
-===================================================== */
-
-/*
-    IMPORTANT:
-
-    The ID is generated ONCE.
-
-    It is stored in localStorage.
-
-    Refreshing the page does NOT create
-    another ID.
-*/
-
-let myPlayerId =
-    localStorage.getItem(
-        "duoplayPlayerId"
-    );
+const SERVER_URL =
+    "https://duoplayserver.onrender.com";
 
 
-/*
-    If this browser has never received
-    an ID, the server will create one.
-*/
+/* =========================================================
+   SOCKET
+========================================================= */
 
 const socket =
-    io(
-        SERVER,
-        {
-            transports: [
-                "websocket",
-                "polling"
-            ],
+    io(SERVER_URL, {
+        transports: [
+            "websocket",
+            "polling"
+        ]
+    });
 
-            auth: {
-                playerId:
-                    myPlayerId || null
-            },
 
-            reconnection: true
-        }
+/* =========================================================
+   PLAYER ID
+========================================================= */
+
+let playerId =
+    localStorage.getItem(
+        "duoplay_player_id"
     );
 
 
-/* =====================================================
+/* =========================================================
+   CURRENT CHALLENGE
+========================================================= */
+
+let currentChallengeId =
+    null;
+
+
+/* =========================================================
    ELEMENTS
-===================================================== */
+========================================================= */
 
-const myIdElement =
+const playersElement =
     document.getElementById(
-        "myId"
+        "players"
     );
 
-const playerList =
-    document.getElementById(
-        "playerList"
-    );
-
-const onlineCount =
+const onlineCountElement =
     document.getElementById(
         "onlineCount"
     );
 
-const requestOverlay =
+const statusTextElement =
     document.getElementById(
-        "requestOverlay"
+        "statusText"
     );
 
-const requestPlayer =
+const statusDotElement =
     document.getElementById(
-        "requestPlayer"
+        "statusDot"
     );
 
-const acceptBtn =
+const challengeOverlay =
     document.getElementById(
-        "acceptBtn"
+        "challengeOverlay"
     );
 
-const declineBtn =
+const challengePlayer =
     document.getElementById(
-        "declineBtn"
+        "challengePlayer"
     );
 
-const toast =
+const messageElement =
     document.getElementById(
-        "toast"
+        "message"
     );
 
 
-/* =====================================================
-   STATE
-===================================================== */
-
-let players = [];
-
-let selectedSocketId = null;
-
-let incomingRequestSocketId = null;
-
-
-/* =====================================================
-   SHOW TOAST
-===================================================== */
-
-function showToast(message) {
-
-    toast.textContent =
-        message;
-
-    toast.classList.add(
-        "show"
-    );
-
-    setTimeout(
-        () => {
-
-            toast.classList.remove(
-                "show"
-            );
-
-        },
-        2500
-    );
-
-}
-
-
-/* =====================================================
-   SAVE PLAYER ID
-===================================================== */
-
-function savePlayerId(id) {
-
-    if (!id) {
-        return;
-    }
-
-    myPlayerId =
-        String(id)
-            .trim()
-            .toUpperCase();
-
-    localStorage.setItem(
-        "duoplayPlayerId",
-        myPlayerId
-    );
-
-    myIdElement.textContent =
-        myPlayerId;
-
-}
-
-
-/* =====================================================
-   SERVER GIVES US OUR ID
-===================================================== */
-
-socket.on(
-    "yourId",
-    id => {
-
-        savePlayerId(id);
-
-        /*
-            After receiving the ID,
-            ask the server for players.
-        */
-
-        socket.emit(
-            "getPlayers"
-        );
-
-    }
-);
-
-
-/* =====================================================
-   CONNECTION
-===================================================== */
+/* =========================================================
+   CONNECTED
+========================================================= */
 
 socket.on(
     "connect",
     () => {
 
-        console.log(
-            "Connected:",
-            socket.id
+        statusTextElement.textContent =
+            "Connected";
+
+        statusDotElement.classList.add(
+            "online"
         );
+
 
         /*
-            If we already had a permanent ID,
-            tell the server to use it.
-        */
-
-        if (myPlayerId) {
-
-            socket.emit(
-                "identify",
-                myPlayerId
-            );
-
-        }
+         * Give the server our saved ID.
+         *
+         * If there is no ID,
+         * server creates one.
+         */
 
         socket.emit(
-            "getPlayers"
+            "register-player",
+            playerId || null
         );
 
     }
 );
 
 
-/* =====================================================
-   CONNECTION ERROR
-===================================================== */
+/* =========================================================
+   DISCONNECTED
+========================================================= */
 
 socket.on(
-    "connect_error",
-    error => {
+    "disconnect",
+    () => {
 
-        console.error(
-            error
-        );
+        statusTextElement.textContent =
+            "Disconnected";
 
-        myIdElement.textContent =
-            "Offline";
-
-        showToast(
-            "Could not connect to server."
+        statusDotElement.classList.remove(
+            "online"
         );
 
     }
 );
 
 
-/* =====================================================
-   PLAYER LIST
-===================================================== */
+/* =========================================================
+   REGISTERED
+========================================================= */
 
 socket.on(
-    "players",
-    list => {
+    "player-registered",
+    (data) => {
 
-        if (!Array.isArray(list)) {
+        if (
+            !data ||
+            !data.playerId
+        ) {
             return;
         }
 
-        players =
-            list;
 
-        renderPlayers();
+        playerId =
+            data.playerId;
+
+
+        /*
+         * THIS IS THE IMPORTANT PART.
+         *
+         * The same ID stays in this browser.
+         */
+
+        localStorage.setItem(
+            "duoplay_player_id",
+            playerId
+        );
+
+
+        socket.emit(
+            "get-online-players"
+        );
 
     }
 );
 
 
-/* =====================================================
+/* =========================================================
+   ONLINE PLAYERS
+========================================================= */
+
+socket.on(
+    "players-online",
+    (players) => {
+
+        renderPlayers(players);
+
+    }
+);
+
+
+/* =========================================================
    RENDER PLAYERS
-===================================================== */
+========================================================= */
 
-function renderPlayers() {
+function renderPlayers(players) {
 
-    /*
-        Sort player IDs alphabetically.
-    */
-
-    players.sort(
-        (a, b) =>
-            String(a.playerId)
-                .localeCompare(
-                    String(b.playerId)
-                )
-    );
-
-
-    onlineCount.textContent =
-        `${players.length} online`;
+    if (!Array.isArray(players)) {
+        players = [];
+    }
 
 
     /*
-        No players.
-    */
+     * Don't show ourselves.
+     */
 
-    if (players.length === 0) {
+    const others =
+        players.filter(
+            player =>
+                player.playerId !==
+                playerId
+        );
 
-        playerList.innerHTML = `
-            <div class="message">
-                No players online.
+
+    onlineCountElement.textContent =
+        `${others.length} online`;
+
+
+    if (others.length === 0) {
+
+        playersElement.innerHTML = `
+            <div class="empty">
+                No other players online.
             </div>
         `;
 
         return;
-
     }
 
 
-    playerList.innerHTML = "";
+    playersElement.innerHTML = "";
 
 
-    players.forEach(
+    others.forEach(
         player => {
-
-            const isMe =
-                player.playerId ===
-                myPlayerId;
-
-            /*
-                Never show a PLAY button
-                for yourself.
-            */
 
             const row =
                 document.createElement(
@@ -1179,32 +831,16 @@ function renderPlayers() {
                 );
 
             row.className =
-                "player-row";
+                "player";
 
 
-            if (
-                selectedSocketId ===
-                player.socketId
-            ) {
-
-                row.classList.add(
-                    "selected"
-                );
-
-            }
-
-
-            /* -----------------------------------------
-               PLAYER INFO
-            ----------------------------------------- */
-
-            const info =
+            const left =
                 document.createElement(
                     "div"
                 );
 
-            info.className =
-                "player-info";
+            left.className =
+                "player-left";
 
 
             const dot =
@@ -1228,217 +864,134 @@ function renderPlayers() {
                 player.playerId;
 
 
-            info.appendChild(
-                dot
-            );
-
-            info.appendChild(
-                id
-            );
+            left.appendChild(dot);
+            left.appendChild(id);
 
 
-            if (isMe) {
-
-                const you =
-                    document.createElement(
-                        "span"
-                    );
-
-                you.className =
-                    "you";
-
-                you.textContent =
-                    "(You)";
-
-                id.appendChild(
-                    you
+            const button =
+                document.createElement(
+                    "button"
                 );
+
+            button.className =
+                "play-button";
+
+            button.textContent =
+                "PLAY";
+
+
+            /*
+             * One click = challenge that player.
+             */
+
+            button.onclick =
+                () => challengePlayer(
+                    player.playerId
+                );
+
+
+            if (player.inGame) {
+
+                button.disabled =
+                    true;
+
+                button.textContent =
+                    "IN GAME";
 
             }
 
 
-            row.appendChild(
-                info
-            );
+            row.appendChild(left);
+            row.appendChild(button);
 
-
-            /* -----------------------------------------
-               PLAY BUTTON
-            ----------------------------------------- */
-
-            if (!isMe) {
-
-                const play =
-                    document.createElement(
-                        "button"
-                    );
-
-                play.className =
-                    "play-btn";
-
-                play.textContent =
-                    "PLAY";
-
-                play.onclick =
-                    event => {
-
-                        event.stopPropagation();
-
-                        sendPlayRequest(
-                            player.socketId,
-                            player.playerId,
-                            play
-                        );
-
-                    };
-
-
-                row.appendChild(
-                    play
-                );
-
-            }
-
-
-            /* -----------------------------------------
-               SELECT PLAYER
-            ----------------------------------------- */
-
-            info.onclick =
-                () => {
-
-                    if (isMe) {
-                        return;
-                    }
-
-                    if (
-                        selectedSocketId ===
-                        player.socketId
-                    ) {
-
-                        selectedSocketId =
-                            null;
-
-                    }
-                    else {
-
-                        selectedSocketId =
-                            player.socketId;
-
-                    }
-
-                    renderPlayers();
-
-                };
-
-
-            playerList.appendChild(
+            playersElement.appendChild(
                 row
             );
 
         }
     );
-
 }
 
 
-/* =====================================================
-   SEND PLAY REQUEST
-===================================================== */
+/* =========================================================
+   CHALLENGE PLAYER
+========================================================= */
 
-function sendPlayRequest(
-    socketId,
-    playerId,
-    button
+function challengePlayer(
+    targetPlayerId
 ) {
+
+    if (!targetPlayerId) {
+        return;
+    }
+
 
     if (!socket.connected) {
 
-        showToast(
-            "You are not connected."
+        showMessage(
+            "Not connected to server.",
+            true
         );
 
         return;
-
     }
-
-    if (
-        !socketId ||
-        !playerId
-    ) {
-
-        return;
-
-    }
-
-
-    button.disabled =
-        true;
-
-    button.textContent =
-        "SENT";
 
 
     socket.emit(
-        "playRequest",
-        socketId
+        "challenge-player",
+        targetPlayerId
     );
 
 
-    showToast(
-        `Chess request sent to ${playerId}`
-    );
-
-
-    /*
-        Re-enable after a short time.
-        This prevents accidental double requests.
-    */
-
-    setTimeout(
-        () => {
-
-            if (
-                button.isConnected
-            ) {
-
-                button.disabled =
-                    false;
-
-                button.textContent =
-                    "PLAY";
-
-            }
-
-        },
-        3000
+    showMessage(
+        "Challenge sent. Waiting for acceptance..."
     );
 
 }
 
 
-/* =====================================================
-   INCOMING PLAY REQUEST
-===================================================== */
+/* =========================================================
+   CHALLENGE SENT
+========================================================= */
 
 socket.on(
-    "playRequest",
-    data => {
+    "challenge-sent",
+    (data) => {
 
-        if (!data) {
+        showMessage(
+            "Challenge sent to " +
+            data.targetPlayerId
+        );
+
+    }
+);
+
+
+/* =========================================================
+   INCOMING CHALLENGE
+========================================================= */
+
+socket.on(
+    "chess-challenge",
+    (data) => {
+
+        if (
+            !data ||
+            !data.challengeId
+        ) {
             return;
         }
 
-        incomingRequestSocketId =
-            data.fromSocketId;
+
+        currentChallengeId =
+            data.challengeId;
 
 
-        requestPlayer.textContent =
-            data.fromPlayerId ||
-            "Player";
+        challengePlayer.textContent =
+            data.fromPlayerId;
 
 
-        requestOverlay.classList.add(
+        challengeOverlay.classList.add(
             "show"
         );
 
@@ -1446,275 +999,244 @@ socket.on(
 );
 
 
-/* =====================================================
+/* =========================================================
    ACCEPT
-===================================================== */
+========================================================= */
 
-acceptBtn.onclick =
-    () => {
+function acceptChallenge() {
 
-        if (
-            !incomingRequestSocketId
-        ) {
-            return;
-        }
+    if (!currentChallengeId) {
+        return;
+    }
 
 
-        acceptBtn.disabled =
-            true;
-
-        declineBtn.disabled =
-            true;
-
-
-        socket.emit(
-            "acceptRequest",
-            incomingRequestSocketId
-        );
+    socket.emit(
+        "accept-challenge",
+        currentChallengeId
+    );
 
 
-        requestOverlay.classList.remove(
-            "show"
-        );
+    challengeOverlay.classList.remove(
+        "show"
+    );
 
 
-        showToast(
-            "Starting Chess..."
-        );
-
-    };
-
-
-/* =====================================================
-   DECLINE
-===================================================== */
-
-declineBtn.onclick =
-    () => {
-
-        if (
-            incomingRequestSocketId
-        ) {
-
-            socket.emit(
-                "declineRequest",
-                incomingRequestSocketId
-            );
-
-        }
+    showMessage(
+        "Starting Chess..."
+    );
+}
 
 
-        incomingRequestSocketId =
-            null;
+/* =========================================================
+   REJECT
+========================================================= */
 
-        requestOverlay.classList.remove(
-            "show"
-        );
+function rejectChallenge() {
 
-    };
+    if (!currentChallengeId) {
+        return;
+    }
 
 
-/* =====================================================
-   REQUEST DECLINED
-===================================================== */
+    socket.emit(
+        "reject-challenge",
+        currentChallengeId
+    );
+
+
+    currentChallengeId =
+        null;
+
+
+    challengeOverlay.classList.remove(
+        "show"
+    );
+}
+
+
+/* =========================================================
+   CHALLENGE REJECTED
+========================================================= */
 
 socket.on(
-    "requestDeclined",
-    data => {
+    "challenge-rejected",
+    () => {
 
-        showToast(
-            "Your Chess request was declined."
+        showMessage(
+            "Your Chess challenge was rejected.",
+            true
         );
 
     }
 );
 
 
-/* =====================================================
-   REQUEST ERROR
-===================================================== */
+/* =========================================================
+   CHESS GAME START
+========================================================= */
 
 socket.on(
-    "requestError",
-    message => {
+    "chess-game-start",
+    (data) => {
 
-        showToast(
+        console.log(
+            "CHESS GAME START:",
+            data
+        );
+
+
+        if (
+            !data ||
+            !data.gameId
+        ) {
+
+            showMessage(
+                "Chess game could not start.",
+                true
+            );
+
+            return;
+        }
+
+
+        /*
+         * SAVE THE SAME GAME INFORMATION
+         * BEFORE OPENING chess.html.
+         */
+
+        sessionStorage.setItem(
+            "duoplay_game_id",
+            data.gameId
+        );
+
+        sessionStorage.setItem(
+            "duoplay_game_color",
+            data.color
+        );
+
+        sessionStorage.setItem(
+            "duoplay_opponent_id",
+            data.opponentId
+        );
+
+
+        /*
+         * Both players receive the same
+         * gameId from server.
+         */
+
+        window.location.href =
+            "chess.html?gameId=" +
+            encodeURIComponent(
+                data.gameId
+            ) +
+            "&color=" +
+            encodeURIComponent(
+                data.color
+            );
+
+    }
+);
+
+
+/* =========================================================
+   SERVER ERROR
+========================================================= */
+
+socket.on(
+    "error-message",
+    (message) => {
+
+        showMessage(
             message ||
-            "Unable to send request."
+            "Something went wrong.",
+            true
         );
 
     }
 );
 
 
-/* =====================================================
-   GAME READY
-===================================================== */
+/* =========================================================
+   FIND PLAYER
+========================================================= */
 
-socket.on(
-    "gameReady",
-    data => {
+function findPlayer() {
 
-        if (!data) {
-            return;
-        }
-
-
-        /*
-            Save complete game information.
-        */
-
-        localStorage.setItem(
-            "duoplayGame",
-            JSON.stringify(data)
+    const firstPlayer =
+        document.querySelector(
+            ".play-button:not(:disabled)"
         );
 
 
-        if (data.roomId) {
+    if (firstPlayer) {
 
-            localStorage.setItem(
-                "duoplayRoomId",
-                data.roomId
-            );
+        firstPlayer.click();
 
-        }
+    } else {
 
-
-        /*
-            Open Chess.
-        */
-
-        showToast(
-            "Chess game ready!"
+        showMessage(
+            "No available player found."
         );
 
+    }
+}
 
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+let messageTimer = null;
+
+function showMessage(
+    text,
+    error = false
+) {
+
+    messageElement.textContent =
+        text;
+
+    messageElement.classList.toggle(
+        "error",
+        error
+    );
+
+    messageElement.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        messageTimer
+    );
+
+
+    messageTimer =
         setTimeout(
             () => {
 
-                window.location.href =
-                    "/chess.html";
+                messageElement.classList.remove(
+                    "show"
+                );
 
             },
-            300
+            3500
         );
-
-    }
-);
-
-
-/* =====================================================
-   OPPONENT LEFT
-===================================================== */
-
-socket.on(
-    "opponentLeft",
-    data => {
-
-        showToast(
-            "The other player left the game."
-        );
-
-    }
-);
-
-
-/* =====================================================
-   ID ERROR
-===================================================== */
-
-socket.on(
-    "idError",
-    message => {
-
-        /*
-            Normally this should not happen.
-
-            If another active browser is already
-            using this ID, the server will reject
-            the ID.
-
-            We then remove the old stored ID and
-            reconnect so a new permanent ID can
-            be assigned.
-
-            This is only for an actual duplicate.
-        */
-
-        console.warn(
-            "ID error:",
-            message
-        );
-
-        localStorage.removeItem(
-            "duoplayPlayerId"
-        );
-
-        showToast(
-            "Player ID conflict. Reconnecting..."
-        );
-
-    }
-);
-
-
-/* =====================================================
-   DISCONNECT
-===================================================== */
-
-socket.on(
-    "disconnect",
-    () => {
-
-        console.log(
-            "Disconnected"
-        );
-
-        onlineCount.textContent =
-            "Offline";
-
-    }
-);
-
-
-/* =====================================================
-   INITIAL DISPLAY
-===================================================== */
-
-if (myPlayerId) {
-
-    myIdElement.textContent =
-        myPlayerId;
-
-}
-else {
-
-    myIdElement.textContent =
-        "Creating ID...";
-
 }
 
 
-/* =====================================================
-   REFRESH PLAYER LIST
-===================================================== */
+/* =========================================================
+   INITIAL
+========================================================= */
 
-setInterval(
-    () => {
+if (socket.connected) {
 
-        if (
-            socket.connected
-        ) {
+    socket.emit(
+        "get-online-players"
+    );
 
-            socket.emit(
-                "getPlayers"
-            );
-
-        }
-
-    },
-    3000
-);
+}
 
 </script>
 
